@@ -185,5 +185,53 @@
     "flatDiscount": "Flat Discount (₹)",
     "confirmPayment": "Confirm Payment",
     "processing": "Processing..."
+  },
+  "gstReports": {
+    "title": "GST Reports",
+    "subtitle": "Monthly GSTR-1 summary with rate-wise breakdown",
+    "exportCSV": "Export CSV",
+    "totalInvoices": "Total Invoices",
+    "taxableValue": "Taxable Value",
+    "totalGST": "Total GST",
+    "grandTotal": "Grand Total",
+    "rateWise": "GST Rate-wise Breakdown",
+    "invoiceWise": "Invoice-wise Details",
+    "gstRate": "GST Rate",
+    "totalTax": "Total Tax",
+    "itemsSold": "Items Sold",
+    "date": "Date",
+    "type": "Type",
+    "noData": "No completed orders for this period"
+  },
+  "eod": {
+    "title": "EOD Settlement",
+    "subtitle": "Daily reconciliation and Z-report",
+    "printZReport": "Print Z-Report",
+    "cashDrawer": "Cash Drawer Reconciliation",
+    "openingCash": "Opening Cash (₹)",
+    "closingCash": "Closing Cash (₹)",
+    "difference": "Difference",
+    "totalOrders": "Total Orders",
+    "totalSales": "Total Sales",
+    "totalTax": "Total Tax",
+    "totalDiscount": "Discounts",
+    "cancelled": "Cancelled",
+    "zReport": "Z-Report"
+  },
+  "discountApproval": {
+    "title": "Discount Approval",
+    "reason": "Reason for discount",
+    "reasonPlaceholder": "e.g., Regular customer, complaint resolution",
+    "managerPin": "Manager/Admin PIN",
+    "pinRequired": "Enter a valid 4-digit PIN",
+    "reasonRequired": "Please provide a reason for the discount",
+    "invalidAmount": "Enter a valid discount amount",
+    "invalidPin": "Invalid PIN — no matching manager found",
+    "notAuthorized": "This PIN does not belong to a manager or admin",
+    "verifying": "Verifying...",
+    "approve": "Approve Discount",
+    "approved": "Discount Approved",
+    "approvedDiscount": "approved discount of",
+    "error": "Verification failed"
   }
 }
