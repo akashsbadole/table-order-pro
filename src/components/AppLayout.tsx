@@ -12,7 +12,7 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 import {
   LayoutDashboard, ShoppingCart, Grid3X3, ChefHat, Package, Settings,
   LogOut, Menu, X, UtensilsCrossed, CalendarDays, FileSpreadsheet, Database,
-  History, Moon, Sun, UserCircle, Shield, AlertTriangle,
+  History, Moon, Sun, UserCircle, Shield, AlertTriangle, Receipt, ClipboardCheck,
 } from 'lucide-react';
 
 
