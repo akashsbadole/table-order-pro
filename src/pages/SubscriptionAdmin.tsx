@@ -4,7 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { Crown, Users, AlertTriangle, CheckCircle, Clock, Search } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Crown, Users, AlertTriangle, CheckCircle, Clock, Search, Settings2 } from 'lucide-react';
+import SubscriptionPlanManager from '@/components/SubscriptionPlanManager';
 
 interface SubRecord {
   id: string;
