@@ -41,12 +41,13 @@ const navItemsDef = [
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { profile, roles, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { lowStockCount } = useLowStockAlert();
   useKeyboardShortcuts();
 
-  const filteredNavItems = navItems.filter((item) => item.roles.some((r) => roles.includes(r)));
+  const filteredNavItems = navItemsDef.filter((item) => item.roles.some((r) => roles.includes(r as any)));
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
