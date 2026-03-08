@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLowStockAlert } from '@/hooks/useLowStockAlert';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   LayoutDashboard, ShoppingCart, Grid3X3, ChefHat, Package, Settings,
   LogOut, Menu, X, UtensilsCrossed, CalendarDays, FileSpreadsheet, Database,
-  History, Moon, Sun,
+  History, Moon, Sun, UserCircle, Shield, AlertTriangle,
 } from 'lucide-react';
 
 interface NavItem {
@@ -25,7 +28,9 @@ const navItems: NavItem[] = [
   { label: 'Kitchen', path: '/kitchen', icon: <ChefHat className="h-5 w-5" />, roles: ['admin', 'manager', 'kitchen_staff'] },
   { label: 'Inventory', path: '/inventory', icon: <Package className="h-5 w-5" />, roles: ['admin', 'manager'] },
   { label: 'Menu', path: '/menu-management', icon: <UtensilsCrossed className="h-5 w-5" />, roles: ['admin', 'manager'] },
+  { label: 'Customers', path: '/customers', icon: <UserCircle className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier'] },
   { label: 'Staff', path: '/staff-scheduling', icon: <CalendarDays className="h-5 w-5" />, roles: ['admin', 'manager'] },
+  { label: 'Audit Logs', path: '/audit-logs', icon: <Shield className="h-5 w-5" />, roles: ['admin'] },
   { label: 'Export/Import', path: '/export-import', icon: <FileSpreadsheet className="h-5 w-5" />, roles: ['admin', 'manager'] },
   { label: 'Backup', path: '/backup', icon: <Database className="h-5 w-5" />, roles: ['admin'] },
   { label: 'Settings', path: '/settings', icon: <Settings className="h-5 w-5" />, roles: ['admin'] },
@@ -36,6 +41,8 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { lowStockCount } = useLowStockAlert();
+  useKeyboardShortcuts();
 
   const filteredNavItems = navItems.filter((item) => item.roles.some((r) => roles.includes(r)));
 
@@ -102,6 +109,14 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <Menu className="h-5 w-5" />
           </Button>
           <div className="flex-1" />
+          {lowStockCount > 0 && (
+            <Link to="/inventory">
+              <Badge variant="destructive" className="gap-1 cursor-pointer">
+                <AlertTriangle className="h-3 w-3" />
+                {lowStockCount} Low Stock
+              </Badge>
+            </Link>
+          )}
           <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9">
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>

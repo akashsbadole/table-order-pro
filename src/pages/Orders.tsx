@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, ShoppingCart, Minus, Trash2, IndianRupee, Loader2 } from 'lucide-react';
+import { Search, Plus, ShoppingCart, Minus, Trash2, IndianRupee, Loader2, Split } from 'lucide-react';
 import { useMenuItems, useMenuCategories } from '@/hooks/useMenuItems';
 import { useCreateOrder } from '@/hooks/useOrders';
 import BillingDialog from '@/components/BillingDialog';
+import SplitBillDialog from '@/components/SplitBillDialog';
 import { useToast } from '@/hooks/use-toast';
 
 interface CartItem {
@@ -29,6 +30,7 @@ const Orders = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [orderType, setOrderType] = useState<'dine_in' | 'takeaway' | 'delivery'>(tableId ? 'dine_in' : 'dine_in');
   const [billingOpen, setBillingOpen] = useState(false);
+  const [splitOpen, setSplitOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const { toast } = useToast();
 
@@ -129,6 +131,9 @@ const Orders = () => {
         </div>
         <div className="flex gap-2 pt-2">
           <Button variant="outline" className="flex-1 touch-target" disabled={cart.length === 0 || createOrder.isPending} onClick={handleKOT}>{createOrder.isPending ? 'Sending...' : 'KOT'}</Button>
+          <Button variant="secondary" className="touch-target gap-1" disabled={cart.length === 0} onClick={() => setSplitOpen(true)}>
+            <Split className="h-3 w-3" />
+          </Button>
           <Button className="flex-1 touch-target" disabled={cart.length === 0} onClick={() => setBillingOpen(true)}>Bill & Pay</Button>
         </div>
       </div>
@@ -209,6 +214,19 @@ const Orders = () => {
       )}
 
       <BillingDialog open={billingOpen} onOpenChange={setBillingOpen} cart={cart} orderType={orderType} onConfirm={handleBillPay} loading={createOrder.isPending} />
+      <SplitBillDialog
+        open={splitOpen}
+        onOpenChange={setSplitOpen}
+        cart={cart}
+        total={total}
+        onConfirmSplit={(splits) => {
+          setSplitOpen(false);
+          toast({
+            title: 'Bill Split',
+            description: splits.map((s) => `${s.label}: ₹${s.amount.toFixed(2)}`).join(' • '),
+          });
+        }}
+      />
     </>
   );
 };

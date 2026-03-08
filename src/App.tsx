@@ -15,6 +15,8 @@ import Tables from "./pages/Tables";
 import Kitchen from "./pages/Kitchen";
 import Inventory from "./pages/Inventory";
 import MenuManagement from "./pages/MenuManagement";
+import Customers from "./pages/Customers";
+import AuditLogs from "./pages/AuditLogs";
 import SettingsPage from "./pages/Settings";
 import StaffScheduling from "./pages/StaffScheduling";
 import ExportImport from "./pages/ExportImport";
@@ -44,6 +46,8 @@ const App = () => (
               <Route path="/kitchen" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'kitchen_staff']}><AppLayout><Kitchen /></AppLayout></ProtectedRoute>} />
               <Route path="/inventory" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><Inventory /></AppLayout></ProtectedRoute>} />
               <Route path="/menu-management" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><MenuManagement /></AppLayout></ProtectedRoute>} />
+              <Route path="/customers" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'cashier']}><AppLayout><Customers /></AppLayout></ProtectedRoute>} />
+              <Route path="/audit-logs" element={<ProtectedRoute allowedRoles={['admin']}><AppLayout><AuditLogs /></AppLayout></ProtectedRoute>} />
               <Route path="/staff-scheduling" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><StaffScheduling /></AppLayout></ProtectedRoute>} />
               <Route path="/export-import" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><ExportImport /></AppLayout></ProtectedRoute>} />
               <Route path="/backup" element={<ProtectedRoute allowedRoles={['admin']}><AppLayout><BackupPage /></AppLayout></ProtectedRoute>} />
