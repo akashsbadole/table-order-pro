@@ -62,6 +62,7 @@ const App = () => (
               <Route path="/gst-reports" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><GSTReports /></AppLayout></ProtectedRoute>} />
               <Route path="/eod-settlement" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'cashier']}><AppLayout><EODSettlement /></AppLayout></ProtectedRoute>} />
               <Route path="/reports" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><Reports /></AppLayout></ProtectedRoute>} />
+              <Route path="/subscription-admin" element={<ProtectedRoute allowedRoles={['admin']}><AppLayout><SubscriptionAdmin /></AppLayout></ProtectedRoute>} />
 
               <Route path="/receipt/:orderId" element={<Receipt />} />
               <Route path="*" element={<NotFound />} />
