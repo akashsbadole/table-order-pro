@@ -12,7 +12,7 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 import {
   LayoutDashboard, ShoppingCart, Grid3X3, ChefHat, Package, Settings,
   LogOut, Menu, X, UtensilsCrossed, CalendarDays, FileSpreadsheet, Database,
-  History, Moon, Sun, UserCircle, Shield, AlertTriangle, Receipt, ClipboardCheck, BarChart3,
+  History, Moon, Sun, UserCircle, Shield, AlertTriangle, Receipt, ClipboardCheck, BarChart3, Crown,
 } from 'lucide-react';
 
 
@@ -32,6 +32,7 @@ const navItemsDef = [
   { labelKey: 'nav.auditLogs', path: '/audit-logs', icon: <Shield className="h-5 w-5" />, roles: ['admin'] },
   { labelKey: 'nav.exportImport', path: '/export-import', icon: <FileSpreadsheet className="h-5 w-5" />, roles: ['admin', 'manager'] },
   { labelKey: 'nav.backup', path: '/backup', icon: <Database className="h-5 w-5" />, roles: ['admin'] },
+  { labelKey: 'nav.subscriptions', path: '/subscription-admin', icon: <Crown className="h-5 w-5" />, roles: ['admin'] },
   { labelKey: 'nav.settings', path: '/settings', icon: <Settings className="h-5 w-5" />, roles: ['admin'] },
 ] as const;
 

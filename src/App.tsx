@@ -28,6 +28,7 @@ import GSTReports from "./pages/GSTReports";
 import EODSettlement from "./pages/EODSettlement";
 import Reports from "./pages/Reports";
 import Pricing from "./pages/Pricing";
+import SubscriptionAdmin from "./pages/SubscriptionAdmin";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
               <Route path="/gst-reports" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><GSTReports /></AppLayout></ProtectedRoute>} />
               <Route path="/eod-settlement" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'cashier']}><AppLayout><EODSettlement /></AppLayout></ProtectedRoute>} />
               <Route path="/reports" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><Reports /></AppLayout></ProtectedRoute>} />
+              <Route path="/subscription-admin" element={<ProtectedRoute allowedRoles={['admin']}><AppLayout><SubscriptionAdmin /></AppLayout></ProtectedRoute>} />
 
               <Route path="/receipt/:orderId" element={<Receipt />} />
               <Route path="*" element={<NotFound />} />
