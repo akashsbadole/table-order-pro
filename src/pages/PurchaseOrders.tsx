@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Loader2, Trash2, Package, FileText } from 'lucide-react';
+import { Plus, Loader2, Trash2, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface POItem {
@@ -18,6 +18,15 @@ interface POItem {
   item_name: string;
   quantity: number;
   unit_price: number;
+}
+
+interface PurchaseOrder {
+  id: string;
+  supplier_name: string;
+  status: string;
+  total_amount: number;
+  notes: string | null;
+  created_at: string;
 }
 
 const statusColors: Record<string, string> = {
@@ -38,12 +47,12 @@ const PurchaseOrders = () => {
   const { data: purchaseOrders = [], isLoading } = useQuery({
     queryKey: ['purchase-orders'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('purchase_orders')
         .select('*')
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return data;
+      return (data || []) as PurchaseOrder[];
     },
   });
 
@@ -72,7 +81,7 @@ const PurchaseOrders = () => {
     mutationFn: async () => {
       if (!profile?.organization_id) throw new Error('No org');
       const totalAmount = poItems.reduce((s, i) => s + i.quantity * i.unit_price, 0);
-      const { data: po, error: poErr } = await supabase.from('purchase_orders').insert({
+      const { data: po, error: poErr } = await (supabase as any).from('purchase_orders').insert({
         organization_id: profile.organization_id,
         supplier_name: supplierName,
         notes,
@@ -87,7 +96,7 @@ const PurchaseOrders = () => {
         quantity: i.quantity,
         unit_price: i.unit_price,
       }));
-      const { error: itemsErr } = await supabase.from('purchase_order_items').insert(items);
+      const { error: itemsErr } = await (supabase as any).from('purchase_order_items').insert(items);
       if (itemsErr) throw itemsErr;
     },
     onSuccess: () => {
@@ -100,14 +109,12 @@ const PurchaseOrders = () => {
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase.from('purchase_orders').update({ status }).eq('id', id);
+      const { error } = await (supabase as any).from('purchase_orders').update({ status }).eq('id', id);
       if (error) throw error;
 
-      // If received, add stock
       if (status === 'received') {
-        const { data: items } = await supabase.from('purchase_order_items').select('*').eq('purchase_order_id', id);
+        const { data: items } = await (supabase as any).from('purchase_order_items').select('*').eq('purchase_order_id', id);
         for (const item of items || []) {
-          await supabase.rpc('get_user_org_id', { _user_id: profile!.user_id }); // just to ensure auth
           const { data: inv } = await supabase.from('inventory_items').select('current_stock').eq('id', item.inventory_item_id).single();
           if (inv) {
             await supabase.from('inventory_items').update({

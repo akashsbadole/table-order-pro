@@ -29,7 +29,6 @@ const StockAdjustmentDialog = ({ open, onOpenChange, item }: Props) => {
       if (isNaN(change) || change === 0) throw new Error('Enter a valid quantity');
       if (!reason.trim()) throw new Error('Reason is required');
 
-      // Update stock
       const newStock = item.current_stock + change;
       const { error: updateErr } = await supabase
         .from('inventory_items')
@@ -37,8 +36,8 @@ const StockAdjustmentDialog = ({ open, onOpenChange, item }: Props) => {
         .eq('id', item.id);
       if (updateErr) throw updateErr;
 
-      // Log adjustment
-      const { error: logErr } = await supabase.from('stock_adjustments').insert({
+      // Log adjustment using raw query via rpc workaround — use from() with type cast
+      const { error: logErr } = await (supabase as any).from('stock_adjustments').insert({
         organization_id: profile.organization_id,
         inventory_item_id: item.id,
         quantity_change: change,
@@ -47,7 +46,6 @@ const StockAdjustmentDialog = ({ open, onOpenChange, item }: Props) => {
       });
       if (logErr) throw logErr;
 
-      // Audit log
       await supabase.from('audit_logs').insert({
         organization_id: profile.organization_id,
         user_id: profile.user_id,
@@ -79,21 +77,11 @@ const StockAdjustmentDialog = ({ open, onOpenChange, item }: Props) => {
           </div>
           <div className="space-y-2">
             <Label>Quantity Change (+ to add, - to remove)</Label>
-            <Input
-              type="number"
-              value={quantityChange}
-              onChange={(e) => setQuantityChange(e.target.value)}
-              placeholder="e.g. +5 or -3"
-            />
+            <Input type="number" value={quantityChange} onChange={(e) => setQuantityChange(e.target.value)} placeholder="e.g. +5 or -3" />
           </div>
           <div className="space-y-2">
             <Label>Reason *</Label>
-            <Textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="e.g. Spoilage, Manual count correction, Received delivery"
-              rows={2}
-            />
+            <Textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. Spoilage, Manual count correction" rows={2} />
           </div>
         </div>
         <DialogFooter>
