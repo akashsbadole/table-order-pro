@@ -5,8 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Crown, Users, AlertTriangle, CheckCircle, Clock, Search, Settings2 } from 'lucide-react';
+import { Crown, Users, AlertTriangle, CheckCircle, Clock, Search, Settings2, MoreHorizontal } from 'lucide-react';
 import SubscriptionPlanManager from '@/components/SubscriptionPlanManager';
+import ManageSubscriptionDialog from '@/components/ManageSubscriptionDialog';
+import { Button } from '@/components/ui/button';
 
 interface SubRecord {
   id: string;
@@ -23,30 +25,32 @@ const SubscriptionAdmin = () => {
   const [subs, setSubs] = useState<SubRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [manageSub, setManageSub] = useState<SubRecord | null>(null);
+
+  const fetchSubs = async () => {
+    const { data } = await supabase
+      .from('subscriptions')
+      .select('*, organizations(name), subscription_plans(name)');
+
+    if (data) {
+      setSubs(
+        data.map((s: any) => ({
+          id: s.id,
+          organization_id: s.organization_id,
+          org_name: s.organizations?.name ?? 'Unknown',
+          status: s.status,
+          billing_cycle: s.billing_cycle,
+          trial_ends_at: s.trial_ends_at,
+          current_period_end: s.current_period_end,
+          plan_name: s.subscription_plans?.name ?? null,
+        }))
+      );
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchAll = async () => {
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .select('*, organizations(name), subscription_plans(name)');
-
-      if (data) {
-        setSubs(
-          data.map((s: any) => ({
-            id: s.id,
-            organization_id: s.organization_id,
-            org_name: s.organizations?.name ?? 'Unknown',
-            status: s.status,
-            billing_cycle: s.billing_cycle,
-            trial_ends_at: s.trial_ends_at,
-            current_period_end: s.current_period_end,
-            plan_name: s.subscription_plans?.name ?? null,
-          }))
-        );
-      }
-      setLoading(false);
-    };
-    fetchAll();
+    fetchSubs();
   }, []);
 
   const now = new Date();
@@ -205,12 +209,13 @@ const SubscriptionAdmin = () => {
                     <TableHead>Billing</TableHead>
                     <TableHead>Trial Ends</TableHead>
                     <TableHead>Period Ends</TableHead>
+                    <TableHead className="w-[80px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                         No subscriptions found
                       </TableCell>
                     </TableRow>
@@ -227,6 +232,16 @@ const SubscriptionAdmin = () => {
                         </TableCell>
                         <TableCell className="text-muted-foreground">{formatDate(sub.trial_ends_at)}</TableCell>
                         <TableCell className="text-muted-foreground">{formatDate(sub.current_period_end)}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setManageSub(sub)}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -240,6 +255,13 @@ const SubscriptionAdmin = () => {
           <SubscriptionPlanManager />
         </TabsContent>
       </Tabs>
+
+      <ManageSubscriptionDialog
+        open={!!manageSub}
+        onOpenChange={(open) => !open && setManageSub(null)}
+        subscription={manageSub}
+        onUpdated={fetchSubs}
+      />
     </div>
   );
 };

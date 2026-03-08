@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Zap, Check } from 'lucide-react';
+import { Zap, Check, Plus, Pencil } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import PlanFormDialog from '@/components/PlanFormDialog';
 
 interface Plan {
   id: string;
@@ -20,6 +22,9 @@ const SubscriptionPlanManager = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
+  const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
   const fetchPlans = async () => {
@@ -67,6 +72,63 @@ const SubscriptionPlanManager = () => {
     setToggling(null);
   };
 
+  const handleCreate = () => {
+    setEditingPlan(null);
+    setDialogOpen(true);
+  };
+
+  const handleEdit = (plan: Plan) => {
+    setEditingPlan(plan);
+    setDialogOpen(true);
+  };
+
+  const handleSubmit = async (data: {
+    name: string;
+    description: string;
+    price_monthly: number;
+    price_yearly: number;
+    features: string[];
+    is_active: boolean;
+  }) => {
+    setSaving(true);
+    const payload = {
+      name: data.name.trim(),
+      description: data.description.trim() || null,
+      price_monthly: data.price_monthly,
+      price_yearly: data.price_yearly,
+      features: data.features,
+      is_active: data.is_active,
+    };
+
+    if (editingPlan) {
+      const { error } = await supabase
+        .from('subscription_plans')
+        .update(payload)
+        .eq('id', editingPlan.id);
+
+      if (error) {
+        toast({ title: 'Update failed', description: error.message, variant: 'destructive' });
+      } else {
+        toast({ title: 'Plan updated', description: `${payload.name} has been updated.` });
+        setDialogOpen(false);
+        await fetchPlans();
+      }
+    } else {
+      const { error } = await supabase
+        .from('subscription_plans')
+        .insert(payload);
+
+      if (error) {
+        toast({ title: 'Creation failed', description: error.message, variant: 'destructive' });
+      } else {
+        toast({ title: 'Plan created', description: `${payload.name} has been created.` });
+        setDialogOpen(false);
+        await fetchPlans();
+      }
+    }
+    setSaving(false);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-10">
@@ -75,68 +137,99 @@ const SubscriptionPlanManager = () => {
     );
   }
 
-  if (plans.length === 0) {
-    return (
-      <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">
-          No subscription plans found. Add plans from the database to manage them here.
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      {plans.map((plan) => (
-        <Card
-          key={plan.id}
-          className={`transition-all ${plan.is_active ? 'border-primary/30' : 'opacity-60 border-muted'}`}
-        >
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Zap className={`h-5 w-5 ${plan.is_active ? 'text-primary' : 'text-muted-foreground'}`} />
-                <CardTitle className="text-lg">{plan.name}</CardTitle>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant={plan.is_active ? 'default' : 'secondary'}>
-                  {plan.is_active ? 'Active' : 'Disabled'}
-                </Badge>
-                <Switch
-                  checked={plan.is_active}
-                  onCheckedChange={() => handleToggle(plan.id, plan.is_active)}
-                  disabled={toggling === plan.id}
-                />
-              </div>
-            </div>
-            {plan.description && (
-              <CardDescription className="mt-1">{plan.description}</CardDescription>
-            )}
-          </CardHeader>
-          <CardContent>
-            <div className="mb-4 flex items-baseline gap-4">
-              <div>
-                <span className="text-2xl font-bold text-foreground">₹{plan.price_monthly}</span>
-                <span className="text-sm text-muted-foreground">/mo</span>
-              </div>
-              <div>
-                <span className="text-2xl font-bold text-foreground">₹{plan.price_yearly}</span>
-                <span className="text-sm text-muted-foreground">/yr</span>
-              </div>
-            </div>
-            {plan.features.length > 0 && (
-              <div className="grid grid-cols-2 gap-1.5">
-                {plan.features.map((feature, i) => (
-                  <div key={i} className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <Check className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <span>{feature}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">{plans.length} plan(s)</p>
+        <Button onClick={handleCreate} size="sm" className="gap-1.5">
+          <Plus className="h-4 w-4" /> Create Plan
+        </Button>
+      </div>
+
+      {plans.length === 0 ? (
+        <Card>
+          <CardContent className="py-8 text-center text-muted-foreground">
+            No subscription plans yet. Create one to get started.
           </CardContent>
         </Card>
-      ))}
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {plans.map((plan) => (
+            <Card
+              key={plan.id}
+              className={`transition-all ${plan.is_active ? 'border-primary/30' : 'opacity-60 border-muted'}`}
+            >
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Zap className={`h-5 w-5 ${plan.is_active ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <CardTitle className="text-lg">{plan.name}</CardTitle>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handleEdit(plan)}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Switch
+                      checked={plan.is_active}
+                      onCheckedChange={() => handleToggle(plan.id, plan.is_active)}
+                      disabled={toggling === plan.id}
+                    />
+                  </div>
+                </div>
+                {plan.description && (
+                  <CardDescription className="mt-1">{plan.description}</CardDescription>
+                )}
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4 flex items-baseline gap-4">
+                  <div>
+                    <span className="text-2xl font-bold text-foreground">₹{plan.price_monthly}</span>
+                    <span className="text-sm text-muted-foreground">/mo</span>
+                  </div>
+                  <div>
+                    <span className="text-2xl font-bold text-foreground">₹{plan.price_yearly}</span>
+                    <span className="text-sm text-muted-foreground">/yr</span>
+                  </div>
+                </div>
+                {plan.features.length > 0 && (
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {plan.features.map((feature, i) => (
+                      <div key={i} className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                        <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <PlanFormDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSubmit={handleSubmit}
+        loading={saving}
+        initialData={
+          editingPlan
+            ? {
+                name: editingPlan.name,
+                description: editingPlan.description ?? '',
+                price_monthly: editingPlan.price_monthly,
+                price_yearly: editingPlan.price_yearly,
+                features: editingPlan.features,
+                is_active: editingPlan.is_active,
+              }
+            : null
+        }
+      />
     </div>
   );
 };
