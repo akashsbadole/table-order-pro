@@ -80,14 +80,24 @@ const Orders = () => {
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleKOT = () => {
-    createOrder.mutate({ cart, orderType }, {
-      onSuccess: () => { setCart([]); setCartOpen(false); toast({ title: 'KOT Sent', description: 'Order sent to kitchen.' }); },
+    createOrder.mutate({ cart, orderType, tableId: tableId || undefined }, {
+      onSuccess: () => {
+        setCart([]);
+        setCartOpen(false);
+        if (tableId) setSearchParams({});
+        toast({ title: 'KOT Sent', description: 'Order sent to kitchen.' });
+      },
     });
   };
 
   const handleBillPay = (paymentMethod: 'cash' | 'card' | 'upi', discount: number) => {
-    createOrder.mutate({ cart, orderType, paymentMethod, discountAmount: discount }, {
-      onSuccess: () => { setCart([]); setBillingOpen(false); setCartOpen(false); },
+    createOrder.mutate({ cart, orderType, tableId: tableId || undefined, paymentMethod, discountAmount: discount }, {
+      onSuccess: () => {
+        setCart([]);
+        setBillingOpen(false);
+        setCartOpen(false);
+        if (tableId) setSearchParams({});
+      },
     });
   };
 
