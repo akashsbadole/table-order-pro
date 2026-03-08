@@ -26,6 +26,7 @@ import NotFound from "./pages/NotFound";
 import Receipt from "./pages/Receipt";
 import GSTReports from "./pages/GSTReports";
 import EODSettlement from "./pages/EODSettlement";
+import Reports from "./pages/Reports";
 
 const queryClient = new QueryClient();
 
