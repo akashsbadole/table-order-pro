@@ -30,6 +30,7 @@ const Orders = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [orderType, setOrderType] = useState<'dine_in' | 'takeaway' | 'delivery'>(tableId ? 'dine_in' : 'dine_in');
   const [billingOpen, setBillingOpen] = useState(false);
+  const [splitOpen, setSplitOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const { toast } = useToast();
 
