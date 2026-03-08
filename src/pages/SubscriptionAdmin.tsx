@@ -209,12 +209,13 @@ const SubscriptionAdmin = () => {
                     <TableHead>Billing</TableHead>
                     <TableHead>Trial Ends</TableHead>
                     <TableHead>Period Ends</TableHead>
+                    <TableHead className="w-[80px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                         No subscriptions found
                       </TableCell>
                     </TableRow>
@@ -231,6 +232,16 @@ const SubscriptionAdmin = () => {
                         </TableCell>
                         <TableCell className="text-muted-foreground">{formatDate(sub.trial_ends_at)}</TableCell>
                         <TableCell className="text-muted-foreground">{formatDate(sub.current_period_end)}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setManageSub(sub)}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -244,6 +255,13 @@ const SubscriptionAdmin = () => {
           <SubscriptionPlanManager />
         </TabsContent>
       </Tabs>
+
+      <ManageSubscriptionDialog
+        open={!!manageSub}
+        onOpenChange={(open) => !open && setManageSub(null)}
+        subscription={manageSub}
+        onUpdated={fetchSubs}
+      />
     </div>
   );
 };
