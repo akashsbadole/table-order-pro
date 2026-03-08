@@ -236,5 +236,38 @@
     "approved": "Discount Approved",
     "approvedDiscount": "approved discount of",
     "error": "Verification failed"
+  },
+  "loyalty": {
+    "title": "Loyalty Program",
+    "availablePoints": "Available Points",
+    "totalVisits": "Total Visits",
+    "pointsToEarn": "Points to Earn",
+    "redeemPoints": "Redeem Points",
+    "newCustomer": "New customer — first visit!"
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Download sales, inventory, and staff reports",
+    "sales": "Sales",
+    "inventory": "Inventory",
+    "staff": "Staff",
+    "exportCSV": "Export CSV",
+    "printPDF": "Print / PDF",
+    "totalOrders": "Total Orders",
+    "revenue": "Revenue",
+    "taxCollected": "Tax Collected",
+    "discounts": "Discounts",
+    "totalItems": "Total Items",
+    "lowStockItems": "Low Stock Items",
+    "inventoryValue": "Inventory Value",
+    "totalShifts": "Total Shifts",
+    "uniqueStaff": "Unique Staff"
+  },
+  "pinLogin": {
+    "title": "Quick PIN Login",
+    "enterPin": "Enter your 4-digit staff PIN",
+    "invalidPin": "No active staff found with this PIN.",
+    "welcome": "Welcome back!",
+    "failed": "PIN Login Failed"
   }
 }
