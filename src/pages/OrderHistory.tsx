@@ -23,6 +23,7 @@ const statusColors: Record<string, string> = {
 };
 
 const OrderHistory = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -30,6 +31,7 @@ const OrderHistory = () => {
   const [dateFilter, setDateFilter] = useState(new Date().toISOString().slice(0, 10));
   const [search, setSearch] = useState('');
   const [viewOrder, setViewOrder] = useState<any>(null);
+  const [receiptOrder, setReceiptOrder] = useState<any>(null);
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['order-history', statusFilter, typeFilter, dateFilter],
