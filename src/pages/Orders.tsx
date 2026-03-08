@@ -4,11 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, ShoppingCart, Minus, Trash2, IndianRupee, Loader2, Split } from 'lucide-react';
+import { Search, Plus, ShoppingCart, Minus, Trash2, IndianRupee, Loader2, Split, Percent } from 'lucide-react';
 import { useMenuItems, useMenuCategories } from '@/hooks/useMenuItems';
 import { useCreateOrder } from '@/hooks/useOrders';
 import BillingDialog from '@/components/BillingDialog';
 import SplitBillDialog from '@/components/SplitBillDialog';
+import DiscountApprovalDialog from '@/components/DiscountApprovalDialog';
 import { useToast } from '@/hooks/use-toast';
 
 interface CartItem {
