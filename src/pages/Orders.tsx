@@ -80,14 +80,25 @@ const Orders = () => {
   };
 
   const handleBillPay = (paymentMethod: 'cash' | 'card' | 'upi', discount: number) => {
-    createOrder.mutate({ cart, orderType, tableId: tableId || undefined, paymentMethod, discountAmount: discount }, {
+    const totalDiscount = discount + approvedDiscount;
+    createOrder.mutate({
+      cart, orderType, tableId: tableId || undefined, paymentMethod,
+      discountAmount: totalDiscount,
+    }, {
       onSuccess: () => {
         setCart([]);
         setBillingOpen(false);
         setCartOpen(false);
+        setApprovedDiscount(0);
+        setApprovedDiscountReason('');
         if (tableId) setSearchParams({});
       },
     });
+  };
+
+  const handleDiscountApproved = (amount: number, reason: string) => {
+    setApprovedDiscount(amount);
+    setApprovedDiscountReason(reason);
   };
 
   const isLoading = catsLoading || itemsLoading;
