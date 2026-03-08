@@ -27,6 +27,7 @@ import Receipt from "./pages/Receipt";
 import GSTReports from "./pages/GSTReports";
 import EODSettlement from "./pages/EODSettlement";
 import Reports from "./pages/Reports";
+import Pricing from "./pages/Pricing";
 
 const queryClient = new QueryClient();
 
