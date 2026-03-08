@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Search, Plus, AlertTriangle, Edit2, Trash2, Loader2, Package } from 'lucide-react';
+import { Search, Plus, AlertTriangle, Edit2, Trash2, Loader2, Package, ArrowUpDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import StockAdjustmentDialog from '@/components/StockAdjustmentDialog';
 
 interface InventoryItem {
   id: string;
@@ -27,6 +28,7 @@ const Inventory = () => {
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editItem, setEditItem] = useState<InventoryItem | null>(null);
+  const [adjustItem, setAdjustItem] = useState<InventoryItem | null>(null);
   const [form, setForm] = useState({ name: '', unit: 'kg', current_stock: '0', low_stock_threshold: '10', cost_per_unit: '0' });
 
   const { data: items = [], isLoading } = useQuery({
@@ -85,11 +87,8 @@ const Inventory = () => {
   const openEdit = (item: InventoryItem) => {
     setEditItem(item);
     setForm({
-      name: item.name,
-      unit: item.unit,
-      current_stock: String(item.current_stock),
-      low_stock_threshold: String(item.low_stock_threshold),
-      cost_per_unit: String(item.cost_per_unit),
+      name: item.name, unit: item.unit, current_stock: String(item.current_stock),
+      low_stock_threshold: String(item.low_stock_threshold), cost_per_unit: String(item.cost_per_unit),
     });
     setDialogOpen(true);
   };
@@ -144,6 +143,9 @@ const Inventory = () => {
                     <CardTitle className="text-sm font-semibold">{item.name}</CardTitle>
                     <div className="flex items-center gap-1">
                       {isLow && <Badge variant="destructive" className="text-[10px]">Low</Badge>}
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAdjustItem(item)}>
+                        <ArrowUpDown className="h-3 w-3" />
+                      </Button>
                       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(item)}>
                         <Edit2 className="h-3 w-3" />
                       </Button>
@@ -169,6 +171,7 @@ const Inventory = () => {
         </div>
       )}
 
+      {/* Add/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editItem ? 'Edit Item' : 'Add Inventory Item'}</DialogTitle></DialogHeader>
@@ -206,6 +209,9 @@ const Inventory = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Stock Adjustment Dialog */}
+      <StockAdjustmentDialog open={!!adjustItem} onOpenChange={() => setAdjustItem(null)} item={adjustItem} />
     </div>
   );
 };

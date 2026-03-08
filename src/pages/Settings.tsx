@@ -9,22 +9,19 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { Save, Building2, Receipt, CreditCard } from 'lucide-react';
+import { Save, Building2, Receipt, CreditCard, Upload, Loader2 } from 'lucide-react';
 
 const SettingsPage = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [uploading, setUploading] = useState(false);
 
   const { data: org, isLoading } = useQuery({
     queryKey: ['organization'],
     queryFn: async () => {
       if (!profile?.organization_id) return null;
-      const { data, error } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('id', profile.organization_id)
-        .single();
+      const { data, error } = await supabase.from('organizations').select('*').eq('id', profile.organization_id).single();
       if (error) throw error;
       return data;
     },
@@ -44,6 +41,7 @@ const SettingsPage = () => {
         tax_type: (org as any).tax_type || 'gst',
         vat_rate: String((org as any).vat_rate || 0),
         upi_id: (org as any).upi_id || '',
+        logo_url: org.logo_url || '',
       });
     }
   }, [org]);
@@ -60,6 +58,7 @@ const SettingsPage = () => {
         tax_type: form.tax_type,
         vat_rate: parseFloat(form.vat_rate) || 0,
         upi_id: form.upi_id,
+        logo_url: form.logo_url || null,
       } as any).eq('id', profile.organization_id);
       if (error) throw error;
     },
@@ -69,6 +68,28 @@ const SettingsPage = () => {
     },
     onError: (e: any) => toast({ title: 'Error', description: e.message, variant: 'destructive' }),
   });
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !profile?.organization_id) return;
+
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${profile.organization_id}/logo.${ext}`;
+
+      const { error: uploadErr } = await supabase.storage.from('org-logos').upload(path, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+
+      const { data: { publicUrl } } = supabase.storage.from('org-logos').getPublicUrl(path);
+      setForm({ ...form, logo_url: publicUrl });
+      toast({ title: 'Logo uploaded' });
+    } catch (err: any) {
+      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   if (isLoading) return <div className="p-8 text-center text-muted-foreground">Loading...</div>;
 
@@ -87,6 +108,32 @@ const SettingsPage = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Logo upload */}
+          <div className="space-y-2">
+            <Label>Restaurant Logo</Label>
+            <div className="flex items-center gap-4">
+              {form.logo_url ? (
+                <img src={form.logo_url} alt="Logo" className="h-16 w-16 rounded-lg object-cover border border-border" />
+              ) : (
+                <div className="h-16 w-16 rounded-lg bg-muted flex items-center justify-center">
+                  <Building2 className="h-6 w-6 text-muted-foreground" />
+                </div>
+              )}
+              <div>
+                <label className="cursor-pointer">
+                  <Button variant="outline" size="sm" className="gap-1" asChild disabled={uploading}>
+                    <span>
+                      {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                      {uploading ? 'Uploading...' : 'Upload Logo'}
+                    </span>
+                  </Button>
+                  <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} disabled={uploading} />
+                </label>
+                <p className="text-[10px] text-muted-foreground mt-1">PNG, JPG up to 2MB</p>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Restaurant Name</Label>

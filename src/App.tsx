@@ -28,6 +28,8 @@ import GSTReports from "./pages/GSTReports";
 import EODSettlement from "./pages/EODSettlement";
 import Reports from "./pages/Reports";
 import SubscriptionAdmin from "./pages/SubscriptionAdmin";
+import PurchaseOrders from "./pages/PurchaseOrders";
+import StaffManagement from "./pages/StaffManagement";
 
 const queryClient = new QueryClient();
 
@@ -51,8 +53,10 @@ const App = () => (
               <Route path="/tables" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'waiter']}><AppLayout><Tables /></AppLayout></ProtectedRoute>} />
               <Route path="/kitchen" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'kitchen_staff']}><AppLayout><Kitchen /></AppLayout></ProtectedRoute>} />
               <Route path="/inventory" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><Inventory /></AppLayout></ProtectedRoute>} />
+              <Route path="/purchase-orders" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><PurchaseOrders /></AppLayout></ProtectedRoute>} />
               <Route path="/menu-management" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><MenuManagement /></AppLayout></ProtectedRoute>} />
               <Route path="/customers" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'cashier']}><AppLayout><Customers /></AppLayout></ProtectedRoute>} />
+              <Route path="/staff-management" element={<ProtectedRoute allowedRoles={['admin']}><AppLayout><StaffManagement /></AppLayout></ProtectedRoute>} />
               <Route path="/audit-logs" element={<ProtectedRoute allowedRoles={['admin']}><AppLayout><AuditLogs /></AppLayout></ProtectedRoute>} />
               <Route path="/staff-scheduling" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><StaffScheduling /></AppLayout></ProtectedRoute>} />
               <Route path="/export-import" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><ExportImport /></AppLayout></ProtectedRoute>} />
