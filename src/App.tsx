@@ -24,6 +24,8 @@ import BackupPage from "./pages/Backup";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
 import Receipt from "./pages/Receipt";
+import GSTReports from "./pages/GSTReports";
+import EODSettlement from "./pages/EODSettlement";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +55,8 @@ const App = () => (
               <Route path="/export-import" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><ExportImport /></AppLayout></ProtectedRoute>} />
               <Route path="/backup" element={<ProtectedRoute allowedRoles={['admin']}><AppLayout><BackupPage /></AppLayout></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute allowedRoles={['admin']}><AppLayout><SettingsPage /></AppLayout></ProtectedRoute>} />
+              <Route path="/gst-reports" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><GSTReports /></AppLayout></ProtectedRoute>} />
+              <Route path="/eod-settlement" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'cashier']}><AppLayout><EODSettlement /></AppLayout></ProtectedRoute>} />
 
               <Route path="/receipt/:orderId" element={<Receipt />} />
               <Route path="*" element={<NotFound />} />

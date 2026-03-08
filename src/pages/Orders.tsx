@@ -4,11 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, ShoppingCart, Minus, Trash2, IndianRupee, Loader2, Split } from 'lucide-react';
+import { Search, Plus, ShoppingCart, Minus, Trash2, IndianRupee, Loader2, Split, Percent } from 'lucide-react';
 import { useMenuItems, useMenuCategories } from '@/hooks/useMenuItems';
 import { useCreateOrder } from '@/hooks/useOrders';
 import BillingDialog from '@/components/BillingDialog';
 import SplitBillDialog from '@/components/SplitBillDialog';
+import DiscountApprovalDialog from '@/components/DiscountApprovalDialog';
 import { useToast } from '@/hooks/use-toast';
 
 interface CartItem {
@@ -32,6 +33,9 @@ const Orders = () => {
   const [billingOpen, setBillingOpen] = useState(false);
   const [splitOpen, setSplitOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [discountApprovalOpen, setDiscountApprovalOpen] = useState(false);
+  const [approvedDiscount, setApprovedDiscount] = useState(0);
+  const [approvedDiscountReason, setApprovedDiscountReason] = useState('');
   const { toast } = useToast();
 
 
@@ -76,14 +80,25 @@ const Orders = () => {
   };
 
   const handleBillPay = (paymentMethod: 'cash' | 'card' | 'upi', discount: number) => {
-    createOrder.mutate({ cart, orderType, tableId: tableId || undefined, paymentMethod, discountAmount: discount }, {
+    const totalDiscount = discount + approvedDiscount;
+    createOrder.mutate({
+      cart, orderType, tableId: tableId || undefined, paymentMethod,
+      discountAmount: totalDiscount,
+    }, {
       onSuccess: () => {
         setCart([]);
         setBillingOpen(false);
         setCartOpen(false);
+        setApprovedDiscount(0);
+        setApprovedDiscountReason('');
         if (tableId) setSearchParams({});
       },
     });
+  };
+
+  const handleDiscountApproved = (amount: number, reason: string) => {
+    setApprovedDiscount(amount);
+    setApprovedDiscountReason(reason);
   };
 
   const isLoading = catsLoading || itemsLoading;
@@ -124,13 +139,21 @@ const Orders = () => {
 
       <div className="border-t border-border p-4 space-y-2">
         <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="font-mono">₹{subtotal.toFixed(2)}</span></div>
+        {approvedDiscount > 0 && (
+          <div className="flex justify-between text-sm text-destructive">
+            <span>Approved Discount</span><span className="font-mono">-₹{approvedDiscount.toFixed(2)}</span>
+          </div>
+        )}
         <div className="flex justify-between text-xs"><span className="text-muted-foreground">GST</span><span className="font-mono">₹{gstAmount.toFixed(2)}</span></div>
         <div className="flex justify-between text-lg font-bold border-t border-border pt-2">
           <span>Total</span>
-          <span className="font-mono flex items-center gap-1"><IndianRupee className="h-4 w-4" />{total.toFixed(2)}</span>
+          <span className="font-mono flex items-center gap-1"><IndianRupee className="h-4 w-4" />{(total - approvedDiscount).toFixed(2)}</span>
         </div>
         <div className="flex gap-2 pt-2">
           <Button variant="outline" className="flex-1 touch-target" disabled={cart.length === 0 || createOrder.isPending} onClick={handleKOT}>{createOrder.isPending ? 'Sending...' : 'KOT'}</Button>
+          <Button variant="secondary" className="touch-target gap-1" disabled={cart.length === 0} onClick={() => setDiscountApprovalOpen(true)}>
+            <Percent className="h-3 w-3" />
+          </Button>
           <Button variant="secondary" className="touch-target gap-1" disabled={cart.length === 0} onClick={() => setSplitOpen(true)}>
             <Split className="h-3 w-3" />
           </Button>
@@ -226,6 +249,12 @@ const Orders = () => {
             description: splits.map((s) => `${s.label}: ₹${s.amount.toFixed(2)}`).join(' • '),
           });
         }}
+      />
+      <DiscountApprovalDialog
+        open={discountApprovalOpen}
+        onOpenChange={setDiscountApprovalOpen}
+        subtotal={subtotal}
+        onApproved={handleDiscountApproved}
       />
     </>
   );

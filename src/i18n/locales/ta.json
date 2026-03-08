@@ -13,6 +13,8 @@
     "exportImport": "ஏற்றுமதி/இறக்குமதி",
     "backup": "காப்புப்பிரதி",
     "settings": "அமைப்புகள்",
+    "gstReports": "GST அறிக்கைகள்",
+    "eodSettlement": "நாள் முடிவு",
     "signOut": "வெளியேறு"
   },
   "common": {
@@ -185,5 +187,53 @@
     "flatDiscount": "தட்டையான தள்ளுபடி (₹)",
     "confirmPayment": "கட்டணத்தை உறுதிப்படுத்து",
     "processing": "செயலாக்கம்..."
+  },
+  "gstReports": {
+    "title": "GST அறிக்கைகள்",
+    "subtitle": "மாதாந்திர GSTR-1 சுருக்கம் விகிதம் வாரியாக",
+    "exportCSV": "CSV பதிவிறக்கு",
+    "totalInvoices": "மொத்த இன்வாய்ஸ்",
+    "taxableValue": "வரிக்குட்பட்ட மதிப்பு",
+    "totalGST": "மொத்த GST",
+    "grandTotal": "மொத்த தொகை",
+    "rateWise": "GST விகிதம் வாரியாக",
+    "invoiceWise": "இன்வாய்ஸ் வாரியாக",
+    "gstRate": "GST விகிதம்",
+    "totalTax": "மொத்த வரி",
+    "itemsSold": "விற்ற பொருட்கள்",
+    "date": "தேதி",
+    "type": "வகை",
+    "noData": "இந்த காலத்திற்கு முடிக்கப்பட்ட ஆர்டர்கள் இல்லை"
+  },
+  "eod": {
+    "title": "நாள் முடிவு தீர்வு",
+    "subtitle": "தினசரி சரிபார்ப்பு மற்றும் Z-அறிக்கை",
+    "printZReport": "Z-அறிக்கை அச்சிடு",
+    "cashDrawer": "பண டிராயர் சரிபார்ப்பு",
+    "openingCash": "தொடக்க பணம் (₹)",
+    "closingCash": "முடிவு பணம் (₹)",
+    "difference": "வேறுபாடு",
+    "totalOrders": "மொத்த ஆர்டர்கள்",
+    "totalSales": "மொத்த விற்பனை",
+    "totalTax": "மொத்த வரி",
+    "totalDiscount": "தள்ளுபடி",
+    "cancelled": "ரத்து",
+    "zReport": "Z-அறிக்கை"
+  },
+  "discountApproval": {
+    "title": "தள்ளுபடி அங்கீகாரம்",
+    "reason": "தள்ளுபடி காரணம்",
+    "reasonPlaceholder": "எ.கா: வழக்கமான வாடிக்கையாளர், புகார் தீர்வு",
+    "managerPin": "மேலாளர்/நிர்வாகி PIN",
+    "pinRequired": "சரியான 4-இலக்க PIN உள்ளிடவும்",
+    "reasonRequired": "தள்ளுபடிக்கான காரணம் தரவும்",
+    "invalidAmount": "சரியான தள்ளுபடி தொகையை உள்ளிடவும்",
+    "invalidPin": "தவறான PIN — மேலாளர் கிடைக்கவில்லை",
+    "notAuthorized": "இந்த PIN மேலாளர் அல்லது நிர்வாகியின் அல்ல",
+    "verifying": "சரிபார்க்கிறது...",
+    "approve": "தள்ளுபடி அங்கீகரி",
+    "approved": "தள்ளுபடி அங்கீகரிக்கப்பட்டது",
+    "approvedDiscount": "தள்ளுபடியை அங்கீகரித்தார்",
+    "error": "சரிபார்ப்பு தோல்வி"
   }
 }

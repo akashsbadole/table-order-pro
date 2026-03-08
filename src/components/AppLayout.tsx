@@ -12,7 +12,7 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 import {
   LayoutDashboard, ShoppingCart, Grid3X3, ChefHat, Package, Settings,
   LogOut, Menu, X, UtensilsCrossed, CalendarDays, FileSpreadsheet, Database,
-  History, Moon, Sun, UserCircle, Shield, AlertTriangle,
+  History, Moon, Sun, UserCircle, Shield, AlertTriangle, Receipt, ClipboardCheck,
 } from 'lucide-react';
 
 
@@ -26,6 +26,8 @@ const navItemsDef = [
   { labelKey: 'nav.menu', path: '/menu-management', icon: <UtensilsCrossed className="h-5 w-5" />, roles: ['admin', 'manager'] },
   { labelKey: 'nav.customers', path: '/customers', icon: <UserCircle className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier'] },
   { labelKey: 'nav.staff', path: '/staff-scheduling', icon: <CalendarDays className="h-5 w-5" />, roles: ['admin', 'manager'] },
+  { labelKey: 'nav.gstReports', path: '/gst-reports', icon: <Receipt className="h-5 w-5" />, roles: ['admin', 'manager'] },
+  { labelKey: 'nav.eodSettlement', path: '/eod-settlement', icon: <ClipboardCheck className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier'] },
   { labelKey: 'nav.auditLogs', path: '/audit-logs', icon: <Shield className="h-5 w-5" />, roles: ['admin'] },
   { labelKey: 'nav.exportImport', path: '/export-import', icon: <FileSpreadsheet className="h-5 w-5" />, roles: ['admin', 'manager'] },
   { labelKey: 'nav.backup', path: '/backup', icon: <Database className="h-5 w-5" />, roles: ['admin'] },
