@@ -14,6 +14,8 @@ import Kitchen from "./pages/Kitchen";
 import Inventory from "./pages/Inventory";
 import MenuManagement from "./pages/MenuManagement";
 import SettingsPage from "./pages/Settings";
+import StaffScheduling from "./pages/StaffScheduling";
+import ExportImport from "./pages/ExportImport";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
 
@@ -31,7 +33,6 @@ const App = () => (
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/" element={<Navigate to="/orders" replace />} />
 
-            {/* Protected routes with layout */}
             <Route path="/dashboard" element={
               <ProtectedRoute allowedRoles={['admin', 'manager']}>
                 <AppLayout><Dashboard /></AppLayout>
@@ -60,6 +61,16 @@ const App = () => (
             <Route path="/menu-management" element={
               <ProtectedRoute allowedRoles={['admin', 'manager']}>
                 <AppLayout><MenuManagement /></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/staff-scheduling" element={
+              <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                <AppLayout><StaffScheduling /></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/export-import" element={
+              <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                <AppLayout><ExportImport /></AppLayout>
               </ProtectedRoute>
             } />
             <Route path="/settings" element={
