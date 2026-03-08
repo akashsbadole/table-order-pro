@@ -82,7 +82,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     ? 'bg-sidebar-primary text-sidebar-primary-foreground'
                     : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                 )}>
-                {item.icon}<span className="truncate">{item.label}</span>
+                {item.icon}<span className="truncate">{t(item.labelKey)}</span>
               </Link>
             ))}
           </nav>
