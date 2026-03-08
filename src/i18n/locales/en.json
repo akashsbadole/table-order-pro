@@ -13,6 +13,8 @@
     "exportImport": "Export/Import",
     "backup": "Backup",
     "settings": "Settings",
+    "gstReports": "GST Reports",
+    "eodSettlement": "EOD Settlement",
     "signOut": "Sign Out"
   },
   "common": {
