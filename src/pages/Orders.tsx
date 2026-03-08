@@ -250,6 +250,12 @@ const Orders = () => {
           });
         }}
       />
+      <DiscountApprovalDialog
+        open={discountApprovalOpen}
+        onOpenChange={setDiscountApprovalOpen}
+        subtotal={subtotal}
+        onApproved={handleDiscountApproved}
+      />
     </>
   );
 };
