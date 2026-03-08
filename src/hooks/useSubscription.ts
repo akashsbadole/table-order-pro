@@ -23,12 +23,13 @@ interface SubscriptionPlan {
 }
 
 export const useSubscription = () => {
-  const { profile } = useAuth();
+  const { profile, loading: authLoading } = useAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!profile?.organization_id) {
       setLoading(false);
       return;
