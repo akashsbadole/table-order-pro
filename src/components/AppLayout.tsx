@@ -15,12 +15,6 @@ import {
   History, Moon, Sun, UserCircle, Shield, AlertTriangle,
 } from 'lucide-react';
 
-interface NavItem {
-  label: string;
-  path: string;
-  icon: React.ReactNode;
-  roles: Array<'admin' | 'manager' | 'cashier' | 'waiter' | 'kitchen_staff'>;
-}
 
 const navItemsDef = [
   { labelKey: 'nav.dashboard', path: '/dashboard', icon: <LayoutDashboard className="h-5 w-5" />, roles: ['admin', 'manager'] },

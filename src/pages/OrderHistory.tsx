@@ -212,13 +212,29 @@ const OrderHistory = () => {
               {viewOrder.status !== 'cancelled' && viewOrder.status !== 'completed' && (
                 <Button variant="destructive" className="w-full touch-target gap-2" onClick={() => cancelOrder.mutate(viewOrder.id)} disabled={cancelOrder.isPending}>
                   <XCircle className="h-4 w-4" />
-                  {cancelOrder.isPending ? 'Cancelling...' : 'Cancel Order'}
+                  {cancelOrder.isPending ? t('orderHistory.cancelling') : t('orderHistory.cancelOrder')}
                 </Button>
               )}
+
+              <Button variant="outline" className="w-full touch-target gap-2" onClick={() => { setReceiptOrder(viewOrder); setViewOrder(null); }}>
+                <MessageSquare className="h-4 w-4" />
+                {t('receipt.sendReceipt')}
+              </Button>
             </div>
           )}
         </DialogContent>
       </Dialog>
+
+      {receiptOrder && (
+        <ReceiptShareDialog
+          open={!!receiptOrder}
+          onOpenChange={() => setReceiptOrder(null)}
+          orderId={receiptOrder.id}
+          orderNumber={receiptOrder.order_number}
+          totalAmount={receiptOrder.total_amount}
+          customerPhone={receiptOrder.customer_phone || ''}
+        />
+      )}
     </div>
   );
 };
