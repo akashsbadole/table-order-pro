@@ -41,6 +41,8 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { lowStockCount } = useLowStockAlert();
+  useKeyboardShortcuts();
 
   const filteredNavItems = navItems.filter((item) => item.roles.some((r) => roles.includes(r)));
 
