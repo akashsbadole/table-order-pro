@@ -28,6 +28,7 @@ import GSTReports from "./pages/GSTReports";
 import EODSettlement from "./pages/EODSettlement";
 import Reports from "./pages/Reports";
 import Pricing from "./pages/Pricing";
+import SubscriptionAdmin from "./pages/SubscriptionAdmin";
 
 const queryClient = new QueryClient();
 
