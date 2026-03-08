@@ -58,7 +58,7 @@ export const useSubscription = () => {
     };
 
     fetch();
-  }, [profile?.organization_id]);
+  }, [profile?.organization_id, authLoading]);
 
   const isActive = (): boolean => {
     if (!subscription) return false;
