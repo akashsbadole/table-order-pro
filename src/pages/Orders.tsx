@@ -32,23 +32,6 @@ const Orders = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const { toast } = useToast();
 
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  gstRate: number;
-  quantity: number;
-  notes: string;
-}
-
-const Orders = () => {
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [orderType, setOrderType] = useState<'dine_in' | 'takeaway' | 'delivery'>('dine_in');
-  const [billingOpen, setBillingOpen] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
-  const { toast } = useToast();
 
   const { data: categories = [], isLoading: catsLoading } = useMenuCategories();
   const { data: menuItems = [], isLoading: itemsLoading } = useMenuItems();
