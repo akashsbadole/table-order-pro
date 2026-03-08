@@ -131,6 +131,9 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </span>
         </header>
         <main className="flex-1 overflow-auto p-3 sm:p-4 lg:p-6">{children}</main>
+        <footer className="border-t border-border px-4 py-1.5 text-center text-[10px] text-muted-foreground/50 font-mono">
+          FoodPOS v1.0.0
+        </footer>
       </div>
     </div>
   );
