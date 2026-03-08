@@ -39,8 +39,8 @@ const OrderHistory = () => {
         .lte('created_at', `${dateFilter}T23:59:59`)
         .order('created_at', { ascending: false });
 
-      if (statusFilter !== 'all') query = query.eq('status', statusFilter);
-      if (typeFilter !== 'all') query = query.eq('order_type', typeFilter);
+      if (statusFilter !== 'all') query = query.eq('status', statusFilter as any);
+      if (typeFilter !== 'all') query = query.eq('order_type', typeFilter as any);
 
       const { data, error } = await query;
       if (error) throw error;
