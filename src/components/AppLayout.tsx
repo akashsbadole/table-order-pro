@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLowStockAlert } from '@/hooks/useLowStockAlert';
@@ -7,44 +8,40 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 import {
   LayoutDashboard, ShoppingCart, Grid3X3, ChefHat, Package, Settings,
   LogOut, Menu, X, UtensilsCrossed, CalendarDays, FileSpreadsheet, Database,
   History, Moon, Sun, UserCircle, Shield, AlertTriangle,
 } from 'lucide-react';
 
-interface NavItem {
-  label: string;
-  path: string;
-  icon: React.ReactNode;
-  roles: Array<'admin' | 'manager' | 'cashier' | 'waiter' | 'kitchen_staff'>;
-}
 
-const navItems: NavItem[] = [
-  { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="h-5 w-5" />, roles: ['admin', 'manager'] },
-  { label: 'Orders', path: '/orders', icon: <ShoppingCart className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier', 'waiter'] },
-  { label: 'History', path: '/order-history', icon: <History className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier'] },
-  { label: 'Tables', path: '/tables', icon: <Grid3X3 className="h-5 w-5" />, roles: ['admin', 'manager', 'waiter'] },
-  { label: 'Kitchen', path: '/kitchen', icon: <ChefHat className="h-5 w-5" />, roles: ['admin', 'manager', 'kitchen_staff'] },
-  { label: 'Inventory', path: '/inventory', icon: <Package className="h-5 w-5" />, roles: ['admin', 'manager'] },
-  { label: 'Menu', path: '/menu-management', icon: <UtensilsCrossed className="h-5 w-5" />, roles: ['admin', 'manager'] },
-  { label: 'Customers', path: '/customers', icon: <UserCircle className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier'] },
-  { label: 'Staff', path: '/staff-scheduling', icon: <CalendarDays className="h-5 w-5" />, roles: ['admin', 'manager'] },
-  { label: 'Audit Logs', path: '/audit-logs', icon: <Shield className="h-5 w-5" />, roles: ['admin'] },
-  { label: 'Export/Import', path: '/export-import', icon: <FileSpreadsheet className="h-5 w-5" />, roles: ['admin', 'manager'] },
-  { label: 'Backup', path: '/backup', icon: <Database className="h-5 w-5" />, roles: ['admin'] },
-  { label: 'Settings', path: '/settings', icon: <Settings className="h-5 w-5" />, roles: ['admin'] },
-];
+const navItemsDef = [
+  { labelKey: 'nav.dashboard', path: '/dashboard', icon: <LayoutDashboard className="h-5 w-5" />, roles: ['admin', 'manager'] },
+  { labelKey: 'nav.orders', path: '/orders', icon: <ShoppingCart className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier', 'waiter'] },
+  { labelKey: 'nav.history', path: '/order-history', icon: <History className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier'] },
+  { labelKey: 'nav.tables', path: '/tables', icon: <Grid3X3 className="h-5 w-5" />, roles: ['admin', 'manager', 'waiter'] },
+  { labelKey: 'nav.kitchen', path: '/kitchen', icon: <ChefHat className="h-5 w-5" />, roles: ['admin', 'manager', 'kitchen_staff'] },
+  { labelKey: 'nav.inventory', path: '/inventory', icon: <Package className="h-5 w-5" />, roles: ['admin', 'manager'] },
+  { labelKey: 'nav.menu', path: '/menu-management', icon: <UtensilsCrossed className="h-5 w-5" />, roles: ['admin', 'manager'] },
+  { labelKey: 'nav.customers', path: '/customers', icon: <UserCircle className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier'] },
+  { labelKey: 'nav.staff', path: '/staff-scheduling', icon: <CalendarDays className="h-5 w-5" />, roles: ['admin', 'manager'] },
+  { labelKey: 'nav.auditLogs', path: '/audit-logs', icon: <Shield className="h-5 w-5" />, roles: ['admin'] },
+  { labelKey: 'nav.exportImport', path: '/export-import', icon: <FileSpreadsheet className="h-5 w-5" />, roles: ['admin', 'manager'] },
+  { labelKey: 'nav.backup', path: '/backup', icon: <Database className="h-5 w-5" />, roles: ['admin'] },
+  { labelKey: 'nav.settings', path: '/settings', icon: <Settings className="h-5 w-5" />, roles: ['admin'] },
+] as const;
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { profile, roles, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { lowStockCount } = useLowStockAlert();
   useKeyboardShortcuts();
 
-  const filteredNavItems = navItems.filter((item) => item.roles.some((r) => roles.includes(r)));
+  const filteredNavItems = navItemsDef.filter((item) => item.roles.some((r) => roles.includes(r as any)));
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -79,7 +76,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     ? 'bg-sidebar-primary text-sidebar-primary-foreground'
                     : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                 )}>
-                {item.icon}<span className="truncate">{item.label}</span>
+                {item.icon}<span className="truncate">{t(item.labelKey)}</span>
               </Link>
             ))}
           </nav>
@@ -95,7 +92,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               </div>
             </div>
             <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-sidebar-foreground/70 hover:bg-sidebar-accent" onClick={signOut}>
-              <LogOut className="h-4 w-4" /> Sign Out
+              <LogOut className="h-4 w-4" /> {t('nav.signOut')}
             </Button>
           </div>
         </div>
@@ -113,10 +110,11 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <Link to="/inventory">
               <Badge variant="destructive" className="gap-1 cursor-pointer">
                 <AlertTriangle className="h-3 w-3" />
-                {lowStockCount} Low Stock
+                {lowStockCount} {t('inventory.lowStock')}
               </Badge>
             </Link>
           )}
+          <LanguageSwitcher />
           <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9">
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>

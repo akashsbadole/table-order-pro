@@ -23,6 +23,7 @@ import ExportImport from "./pages/ExportImport";
 import BackupPage from "./pages/Backup";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
+import Receipt from "./pages/Receipt";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="/backup" element={<ProtectedRoute allowedRoles={['admin']}><AppLayout><BackupPage /></AppLayout></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute allowedRoles={['admin']}><AppLayout><SettingsPage /></AppLayout></ProtectedRoute>} />
 
+              <Route path="/receipt/:orderId" element={<Receipt />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

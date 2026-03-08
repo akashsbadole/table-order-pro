@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,8 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Loader2, Search, XCircle, Eye, History } from 'lucide-react';
+import { Loader2, Search, XCircle, Eye, History, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import ReceiptShareDialog from '@/components/ReceiptShareDialog';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-warning/10 text-warning border-warning/30',
@@ -21,6 +23,7 @@ const statusColors: Record<string, string> = {
 };
 
 const OrderHistory = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -28,6 +31,7 @@ const OrderHistory = () => {
   const [dateFilter, setDateFilter] = useState(new Date().toISOString().slice(0, 10));
   const [search, setSearch] = useState('');
   const [viewOrder, setViewOrder] = useState<any>(null);
+  const [receiptOrder, setReceiptOrder] = useState<any>(null);
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['order-history', statusFilter, typeFilter, dateFilter],
@@ -208,13 +212,29 @@ const OrderHistory = () => {
               {viewOrder.status !== 'cancelled' && viewOrder.status !== 'completed' && (
                 <Button variant="destructive" className="w-full touch-target gap-2" onClick={() => cancelOrder.mutate(viewOrder.id)} disabled={cancelOrder.isPending}>
                   <XCircle className="h-4 w-4" />
-                  {cancelOrder.isPending ? 'Cancelling...' : 'Cancel Order'}
+                  {cancelOrder.isPending ? t('orderHistory.cancelling') : t('orderHistory.cancelOrder')}
                 </Button>
               )}
+
+              <Button variant="outline" className="w-full touch-target gap-2" onClick={() => { setReceiptOrder(viewOrder); setViewOrder(null); }}>
+                <MessageSquare className="h-4 w-4" />
+                {t('receipt.sendReceipt')}
+              </Button>
             </div>
           )}
         </DialogContent>
       </Dialog>
+
+      {receiptOrder && (
+        <ReceiptShareDialog
+          open={!!receiptOrder}
+          onOpenChange={() => setReceiptOrder(null)}
+          orderId={receiptOrder.id}
+          orderNumber={receiptOrder.order_number}
+          totalAmount={receiptOrder.total_amount}
+          customerPhone={receiptOrder.customer_phone || ''}
+        />
+      )}
     </div>
   );
 };
