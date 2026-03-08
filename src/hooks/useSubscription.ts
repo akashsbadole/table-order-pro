@@ -40,7 +40,7 @@ export const useSubscription = () => {
           .from('subscriptions')
           .select('*')
           .eq('organization_id', profile.organization_id!)
-          .single(),
+          .maybeSingle(),
         supabase.from('subscription_plans').select('*').eq('is_active', true),
       ]);
 
