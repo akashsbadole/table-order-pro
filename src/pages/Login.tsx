@@ -198,6 +198,12 @@ const Login = () => {
           </CardContent>
         </Card>
       </div>
+
+      <PinLoginDialog
+        open={pinDialogOpen}
+        onOpenChange={setPinDialogOpen}
+        onSuccess={() => navigate('/orders')}
+      />
     </div>
   );
 };

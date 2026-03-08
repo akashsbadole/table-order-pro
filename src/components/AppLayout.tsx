@@ -28,6 +28,7 @@ const navItemsDef = [
   { labelKey: 'nav.staff', path: '/staff-scheduling', icon: <CalendarDays className="h-5 w-5" />, roles: ['admin', 'manager'] },
   { labelKey: 'nav.gstReports', path: '/gst-reports', icon: <Receipt className="h-5 w-5" />, roles: ['admin', 'manager'] },
   { labelKey: 'nav.eodSettlement', path: '/eod-settlement', icon: <ClipboardCheck className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier'] },
+  { labelKey: 'nav.reports', path: '/reports', icon: <BarChart3 className="h-5 w-5" />, roles: ['admin', 'manager'] },
   { labelKey: 'nav.auditLogs', path: '/audit-logs', icon: <Shield className="h-5 w-5" />, roles: ['admin'] },
   { labelKey: 'nav.exportImport', path: '/export-import', icon: <FileSpreadsheet className="h-5 w-5" />, roles: ['admin', 'manager'] },
   { labelKey: 'nav.backup', path: '/backup', icon: <Database className="h-5 w-5" />, roles: ['admin'] },
