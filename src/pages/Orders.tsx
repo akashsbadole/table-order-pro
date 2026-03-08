@@ -3,8 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Plus, ShoppingCart, Minus, Trash2, IndianRupee } from 'lucide-react';
+import { Search, Plus, ShoppingCart, Minus, Trash2, IndianRupee, Loader2 } from 'lucide-react';
+import { useMenuItems, useMenuCategories } from '@/hooks/useMenuItems';
+import { useCreateOrder } from '@/hooks/useOrders';
+import BillingDialog from '@/components/BillingDialog';
+import { useToast } from '@/hooks/use-toast';
 
 interface CartItem {
   id: string;
@@ -15,42 +18,31 @@ interface CartItem {
   notes: string;
 }
 
-const DEMO_CATEGORIES = ['All', 'Starters', 'Main Course', 'Breads', 'Beverages', 'Desserts'];
-
-const DEMO_ITEMS = [
-  { id: '1', name: 'Paneer Tikka', price: 280, gstRate: 5, category: 'Starters', isVeg: true },
-  { id: '2', name: 'Chicken 65', price: 320, gstRate: 5, category: 'Starters', isVeg: false },
-  { id: '3', name: 'Butter Chicken', price: 380, gstRate: 5, category: 'Main Course', isVeg: false },
-  { id: '4', name: 'Dal Makhani', price: 260, gstRate: 5, category: 'Main Course', isVeg: true },
-  { id: '5', name: 'Palak Paneer', price: 280, gstRate: 5, category: 'Main Course', isVeg: true },
-  { id: '6', name: 'Butter Naan', price: 60, gstRate: 5, category: 'Breads', isVeg: true },
-  { id: '7', name: 'Garlic Naan', price: 70, gstRate: 5, category: 'Breads', isVeg: true },
-  { id: '8', name: 'Masala Chai', price: 40, gstRate: 5, category: 'Beverages', isVeg: true },
-  { id: '9', name: 'Lassi', price: 80, gstRate: 5, category: 'Beverages', isVeg: true },
-  { id: '10', name: 'Gulab Jamun', price: 120, gstRate: 5, category: 'Desserts', isVeg: true },
-  { id: '11', name: 'Biryani', price: 350, gstRate: 5, category: 'Main Course', isVeg: false },
-  { id: '12', name: 'Tandoori Roti', price: 40, gstRate: 5, category: 'Breads', isVeg: true },
-];
-
 const Orders = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [orderType, setOrderType] = useState<'dine_in' | 'takeaway' | 'delivery'>('dine_in');
+  const [billingOpen, setBillingOpen] = useState(false);
+  const { toast } = useToast();
 
-  const filteredItems = DEMO_ITEMS.filter((item) => {
+  const { data: categories = [], isLoading: catsLoading } = useMenuCategories();
+  const { data: menuItems = [], isLoading: itemsLoading } = useMenuItems();
+  const createOrder = useCreateOrder();
+
+  const filteredItems = menuItems.filter((item) => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
+    const matchesCategory = !activeCategory || item.category_id === activeCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const addToCart = (item: typeof DEMO_ITEMS[0]) => {
+  const addToCart = (item: typeof menuItems[0]) => {
     setCart((prev) => {
       const existing = prev.find((c) => c.id === item.id);
       if (existing) {
         return prev.map((c) => (c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c));
       }
-      return [...prev, { id: item.id, name: item.name, price: item.price, gstRate: item.gstRate, quantity: 1, notes: '' }];
+      return [...prev, { id: item.id, name: item.name, price: Number(item.price), gstRate: Number(item.gst_rate), quantity: 1, notes: '' }];
     });
   };
 
@@ -70,9 +62,35 @@ const Orders = () => {
   const sgst = gstAmount / 2;
   const total = subtotal + gstAmount;
 
+  const handleKOT = () => {
+    createOrder.mutate(
+      { cart, orderType },
+      {
+        onSuccess: () => {
+          setCart([]);
+          toast({ title: 'KOT Sent', description: 'Order sent to kitchen.' });
+        },
+      }
+    );
+  };
+
+  const handleBillPay = (paymentMethod: 'cash' | 'card' | 'upi') => {
+    createOrder.mutate(
+      { cart, orderType, paymentMethod },
+      {
+        onSuccess: () => {
+          setCart([]);
+          setBillingOpen(false);
+        },
+      }
+    );
+  };
+
+  const isLoading = catsLoading || itemsLoading;
+
   return (
     <div className="flex h-[calc(100vh-7rem)] gap-4">
-      {/* Menu Grid - Left Side */}
+      {/* Menu Grid */}
       <div className="flex flex-1 flex-col overflow-hidden">
         <div className="mb-4 flex items-center gap-3">
           <div className="relative flex-1">
@@ -101,42 +119,56 @@ const Orders = () => {
 
         {/* Category tabs */}
         <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
-          {DEMO_CATEGORIES.map((cat) => (
+          <Button
+            variant={!activeCategory ? 'default' : 'secondary'}
+            size="sm"
+            onClick={() => setActiveCategory(null)}
+            className="touch-target shrink-0"
+          >
+            All
+          </Button>
+          {categories.map((cat) => (
             <Button
-              key={cat}
-              variant={activeCategory === cat ? 'default' : 'secondary'}
+              key={cat.id}
+              variant={activeCategory === cat.id ? 'default' : 'secondary'}
               size="sm"
-              onClick={() => setActiveCategory(cat)}
+              onClick={() => setActiveCategory(cat.id)}
               className="touch-target shrink-0"
             >
-              {cat}
+              {cat.name}
             </Button>
           ))}
         </div>
 
         {/* Items Grid */}
         <div className="flex-1 overflow-auto">
-          <div className="pos-grid">
-            {filteredItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => addToCart(item)}
-                className="flex flex-col items-start rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary hover:shadow-md active:scale-[0.98] touch-target"
-              >
-                <div className="mb-2 flex w-full items-start justify-between">
-                  <span className="text-sm font-semibold text-card-foreground leading-tight">{item.name}</span>
-                  <Badge variant={item.isVeg ? 'default' : 'destructive'} className="ml-1 shrink-0 text-[10px] px-1.5 py-0">
-                    {item.isVeg ? 'V' : 'NV'}
-                  </Badge>
-                </div>
-                <span className="text-base font-bold font-mono text-primary">₹{item.price}</span>
-              </button>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="flex h-full items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <div className="pos-grid">
+              {filteredItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => addToCart(item)}
+                  className="flex flex-col items-start rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary hover:shadow-md active:scale-[0.98] touch-target"
+                >
+                  <div className="mb-2 flex w-full items-start justify-between">
+                    <span className="text-sm font-semibold text-card-foreground leading-tight">{item.name}</span>
+                    <Badge variant={item.is_veg ? 'default' : 'destructive'} className="ml-1 shrink-0 text-[10px] px-1.5 py-0">
+                      {item.is_veg ? 'V' : 'NV'}
+                    </Badge>
+                  </div>
+                  <span className="text-base font-bold font-mono text-primary">₹{Number(item.price)}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Cart - Right Side */}
+      {/* Cart */}
       <Card className="flex w-80 shrink-0 flex-col lg:w-96">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -149,7 +181,6 @@ const Orders = () => {
         </CardHeader>
 
         <CardContent className="flex flex-1 flex-col overflow-hidden p-0">
-          {/* Cart Items */}
           <div className="flex-1 overflow-auto px-6">
             {cart.length === 0 ? (
               <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -203,16 +234,34 @@ const Orders = () => {
               </span>
             </div>
             <div className="flex gap-2 pt-2">
-              <Button variant="outline" className="flex-1 touch-target" disabled={cart.length === 0}>
-                KOT
+              <Button
+                variant="outline"
+                className="flex-1 touch-target"
+                disabled={cart.length === 0 || createOrder.isPending}
+                onClick={handleKOT}
+              >
+                {createOrder.isPending ? 'Sending...' : 'KOT'}
               </Button>
-              <Button className="flex-1 touch-target" disabled={cart.length === 0}>
+              <Button
+                className="flex-1 touch-target"
+                disabled={cart.length === 0}
+                onClick={() => setBillingOpen(true)}
+              >
                 Bill & Pay
               </Button>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      <BillingDialog
+        open={billingOpen}
+        onOpenChange={setBillingOpen}
+        cart={cart}
+        orderType={orderType}
+        onConfirm={handleBillPay}
+        loading={createOrder.isPending}
+      />
     </div>
   );
 };
