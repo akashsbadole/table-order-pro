@@ -2,25 +2,77 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import AppLayout from "@/components/AppLayout";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Orders from "./pages/Orders";
+import Tables from "./pages/Tables";
+import Kitchen from "./pages/Kitchen";
+import Inventory from "./pages/Inventory";
+import MenuManagement from "./pages/MenuManagement";
+import SettingsPage from "./pages/Settings";
+import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="/" element={<Navigate to="/orders" replace />} />
+
+            {/* Protected routes with layout */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                <AppLayout><Dashboard /></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/orders" element={
+              <ProtectedRoute allowedRoles={['admin', 'manager', 'cashier', 'waiter']}>
+                <AppLayout><Orders /></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/tables" element={
+              <ProtectedRoute allowedRoles={['admin', 'manager', 'waiter']}>
+                <AppLayout><Tables /></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/kitchen" element={
+              <ProtectedRoute allowedRoles={['admin', 'manager', 'kitchen_staff']}>
+                <AppLayout><Kitchen /></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/inventory" element={
+              <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                <AppLayout><Inventory /></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/menu-management" element={
+              <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                <AppLayout><MenuManagement /></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AppLayout><SettingsPage /></AppLayout>
+              </ProtectedRoute>
+            } />
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
