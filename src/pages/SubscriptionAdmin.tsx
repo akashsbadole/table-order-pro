@@ -5,8 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Crown, Users, AlertTriangle, CheckCircle, Clock, Search, Settings2 } from 'lucide-react';
+import { Crown, Users, AlertTriangle, CheckCircle, Clock, Search, Settings2, MoreHorizontal } from 'lucide-react';
 import SubscriptionPlanManager from '@/components/SubscriptionPlanManager';
+import ManageSubscriptionDialog from '@/components/ManageSubscriptionDialog';
+import { Button } from '@/components/ui/button';
 
 interface SubRecord {
   id: string;
