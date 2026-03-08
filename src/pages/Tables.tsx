@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,11 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { QRCodeSVG } from 'qrcode.react';
-import { QrCode, Plus, Users } from 'lucide-react';
+import { QrCode, Plus, Users, ShoppingCart, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface RestaurantTable {
   id: string;
@@ -32,6 +32,7 @@ const statusConfig = {
 const Tables = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [qrTable, setQrTable] = useState<RestaurantTable | null>(null);
   const [addOpen, setAddOpen] = useState(false);
@@ -49,6 +50,42 @@ const Tables = () => {
       return data as RestaurantTable[];
     },
   });
+
+  // Fetch active orders linked to tables
+  const { data: tableOrders = {} } = useQuery({
+    queryKey: ['table-orders'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('id, order_number, table_id, total_amount, status')
+        .not('table_id', 'is', null)
+        .in('status', ['pending', 'confirmed', 'preparing', 'ready', 'served'])
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      const map: Record<string, { id: string; order_number: number; total_amount: number; status: string }> = {};
+      (data || []).forEach((o) => {
+        if (o.table_id && !map[o.table_id]) {
+          map[o.table_id] = { id: o.id, order_number: o.order_number, total_amount: Number(o.total_amount), status: o.status };
+        }
+      });
+      return map;
+    },
+    refetchInterval: 15000,
+  });
+
+  const handleTableTap = (table: RestaurantTable) => {
+    const activeOrder = tableOrders[table.id];
+    if (table.status === 'vacant') {
+      // Navigate to orders with this table pre-selected
+      navigate(`/orders?table=${table.id}&table_number=${table.table_number}`);
+    } else if (table.status === 'occupied' && activeOrder) {
+      // Navigate to the existing order for this table
+      navigate(`/orders?table=${table.id}&table_number=${table.table_number}&order=${activeOrder.id}`);
+    } else if (table.status === 'dirty') {
+      // Mark as vacant
+      updateStatus.mutate({ id: table.id, status: 'vacant' });
+    }
+  };
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: 'vacant' | 'occupied' | 'dirty' }) => {
@@ -78,11 +115,6 @@ const Tables = () => {
     onError: (e: any) => toast({ title: 'Error', description: e.message, variant: 'destructive' }),
   });
 
-  const nextStatus = (current: string) => {
-    const cycle = { vacant: 'occupied', occupied: 'dirty', dirty: 'vacant' } as const;
-    return cycle[current as keyof typeof cycle];
-  };
-
   const sections = [...new Set(tables.map((t) => t.section).filter(Boolean))] as string[];
   const filteredTables = filterSection ? tables.filter((t) => t.section === filterSection) : tables;
 
@@ -95,12 +127,14 @@ const Tables = () => {
 
   const qrUrl = qrTable ? `${window.location.origin}/menu?table=${qrTable.table_number}` : '';
 
+  if (isLoading) return <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Table Management</h1>
-          <p className="text-sm text-muted-foreground">Tap a table to cycle status • Long-press for QR</p>
+          <p className="text-sm text-muted-foreground">Tap vacant → new order • Tap occupied → view order • Tap dirty → clean</p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <Badge variant="outline" className="border-success text-success">Vacant: {summary.vacant}</Badge>
@@ -112,9 +146,8 @@ const Tables = () => {
         </div>
       </div>
 
-      {/* Section filter */}
       {sections.length > 1 && (
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-1">
           <Button variant={!filterSection ? 'default' : 'secondary'} size="sm" onClick={() => setFilterSection(null)}>All</Button>
           {sections.map((s) => (
             <Button key={s} variant={filterSection === s ? 'default' : 'secondary'} size="sm" onClick={() => setFilterSection(s)}>{s}</Button>
@@ -125,20 +158,33 @@ const Tables = () => {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {filteredTables.map((table) => {
           const config = statusConfig[table.status];
+          const activeOrder = tableOrders[table.id];
           return (
             <Card
               key={table.id}
               className={cn('cursor-pointer border-2 transition-all active:scale-[0.97]', config.className)}
-              onClick={() => updateStatus.mutate({ id: table.id, status: nextStatus(table.status) })}
+              onClick={() => handleTableTap(table)}
               onContextMenu={(e) => { e.preventDefault(); setQrTable(table); }}
             >
-              <CardContent className="flex flex-col items-center justify-center p-6">
+              <CardContent className="flex flex-col items-center justify-center p-4 sm:p-6">
                 <span className="text-2xl font-bold font-mono">{table.table_number}</span>
                 <span className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                   <Users className="h-3 w-3" />{table.capacity}
                 </span>
                 {table.section && <span className="text-[10px] text-muted-foreground">{table.section}</span>}
                 <Badge variant="secondary" className="mt-2 text-[10px]">{config.label}</Badge>
+
+                {/* Show active order info */}
+                {activeOrder && (
+                  <div className="mt-2 text-center">
+                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                      <ShoppingCart className="h-3 w-3" />
+                      <span>#{activeOrder.order_number}</span>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-primary">₹{activeOrder.total_amount.toFixed(0)}</span>
+                  </div>
+                )}
+
                 <Button
                   variant="ghost" size="icon" className="mt-1 h-6 w-6"
                   onClick={(e) => { e.stopPropagation(); setQrTable(table); }}

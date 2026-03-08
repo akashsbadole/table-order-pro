@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,13 +20,18 @@ interface CartItem {
 }
 
 const Orders = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tableId = searchParams.get('table');
+  const tableNumber = searchParams.get('table_number');
+
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [orderType, setOrderType] = useState<'dine_in' | 'takeaway' | 'delivery'>('dine_in');
+  const [orderType, setOrderType] = useState<'dine_in' | 'takeaway' | 'delivery'>(tableId ? 'dine_in' : 'dine_in');
   const [billingOpen, setBillingOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const { toast } = useToast();
+
 
   const { data: categories = [], isLoading: catsLoading } = useMenuCategories();
   const { data: menuItems = [], isLoading: itemsLoading } = useMenuItems();
@@ -57,14 +63,24 @@ const Orders = () => {
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleKOT = () => {
-    createOrder.mutate({ cart, orderType }, {
-      onSuccess: () => { setCart([]); setCartOpen(false); toast({ title: 'KOT Sent', description: 'Order sent to kitchen.' }); },
+    createOrder.mutate({ cart, orderType, tableId: tableId || undefined }, {
+      onSuccess: () => {
+        setCart([]);
+        setCartOpen(false);
+        if (tableId) setSearchParams({});
+        toast({ title: 'KOT Sent', description: 'Order sent to kitchen.' });
+      },
     });
   };
 
   const handleBillPay = (paymentMethod: 'cash' | 'card' | 'upi', discount: number) => {
-    createOrder.mutate({ cart, orderType, paymentMethod, discountAmount: discount }, {
-      onSuccess: () => { setCart([]); setBillingOpen(false); setCartOpen(false); },
+    createOrder.mutate({ cart, orderType, tableId: tableId || undefined, paymentMethod, discountAmount: discount }, {
+      onSuccess: () => {
+        setCart([]);
+        setBillingOpen(false);
+        setCartOpen(false);
+        if (tableId) setSearchParams({});
+      },
     });
   };
 
@@ -73,9 +89,10 @@ const Orders = () => {
   const cartPanel = (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between p-4 border-b border-border">
-        <h3 className="flex items-center gap-2 text-lg font-semibold">
+        <h3 className="flex items-center gap-2 text-lg font-semibold flex-wrap">
           <ShoppingCart className="h-5 w-5" /> Cart
           <Badge variant="secondary" className="capitalize">{orderType.replace('_', ' ')}</Badge>
+          {tableNumber && <Badge variant="outline" className="text-xs">Table {tableNumber}</Badge>}
         </h3>
         <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setCartOpen(false)}>✕</Button>
       </div>
