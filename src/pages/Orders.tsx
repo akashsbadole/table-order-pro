@@ -214,6 +214,19 @@ const Orders = () => {
       )}
 
       <BillingDialog open={billingOpen} onOpenChange={setBillingOpen} cart={cart} orderType={orderType} onConfirm={handleBillPay} loading={createOrder.isPending} />
+      <SplitBillDialog
+        open={splitOpen}
+        onOpenChange={setSplitOpen}
+        cart={cart}
+        total={total}
+        onConfirmSplit={(splits) => {
+          setSplitOpen(false);
+          toast({
+            title: 'Bill Split',
+            description: splits.map((s) => `${s.label}: ₹${s.amount.toFixed(2)}`).join(' • '),
+          });
+        }}
+      />
     </>
   );
 };
