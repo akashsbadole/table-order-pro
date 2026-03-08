@@ -76,6 +76,9 @@ const Login = () => {
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">FoodPOS</h1>
           <p className="mt-1 text-sm text-muted-foreground">Restaurant Point of Sale</p>
+          <Button variant="outline" size="sm" className="mt-3 gap-2" onClick={() => setPinDialogOpen(true)}>
+            <KeyRound className="h-4 w-4" /> Quick PIN Login
+          </Button>
         </div>
 
         <Card className="mb-6">
