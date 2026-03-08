@@ -139,13 +139,21 @@ const Orders = () => {
 
       <div className="border-t border-border p-4 space-y-2">
         <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="font-mono">₹{subtotal.toFixed(2)}</span></div>
+        {approvedDiscount > 0 && (
+          <div className="flex justify-between text-sm text-destructive">
+            <span>Approved Discount</span><span className="font-mono">-₹{approvedDiscount.toFixed(2)}</span>
+          </div>
+        )}
         <div className="flex justify-between text-xs"><span className="text-muted-foreground">GST</span><span className="font-mono">₹{gstAmount.toFixed(2)}</span></div>
         <div className="flex justify-between text-lg font-bold border-t border-border pt-2">
           <span>Total</span>
-          <span className="font-mono flex items-center gap-1"><IndianRupee className="h-4 w-4" />{total.toFixed(2)}</span>
+          <span className="font-mono flex items-center gap-1"><IndianRupee className="h-4 w-4" />{(total - approvedDiscount).toFixed(2)}</span>
         </div>
         <div className="flex gap-2 pt-2">
           <Button variant="outline" className="flex-1 touch-target" disabled={cart.length === 0 || createOrder.isPending} onClick={handleKOT}>{createOrder.isPending ? 'Sending...' : 'KOT'}</Button>
+          <Button variant="secondary" className="touch-target gap-1" disabled={cart.length === 0} onClick={() => setDiscountApprovalOpen(true)}>
+            <Percent className="h-3 w-3" />
+          </Button>
           <Button variant="secondary" className="touch-target gap-1" disabled={cart.length === 0} onClick={() => setSplitOpen(true)}>
             <Split className="h-3 w-3" />
           </Button>
