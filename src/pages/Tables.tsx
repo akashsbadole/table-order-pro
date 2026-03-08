@@ -9,10 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { QRCodeSVG } from 'qrcode.react';
-import { QrCode, Plus, Users, ShoppingCart, Loader2 } from 'lucide-react';
+import { QrCode, Plus, Users, ShoppingCart, Loader2, ArrowRightLeft, Combine } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import TableTransferDialog from '@/components/TableTransferDialog';
+import MergeTablesDialog from '@/components/MergeTablesDialog';
 
 interface RestaurantTable {
   id: string;
@@ -21,6 +23,8 @@ interface RestaurantTable {
   status: 'vacant' | 'occupied' | 'dirty';
   section: string | null;
   floor: string | null;
+  pos_x: number | null;
+  pos_y: number | null;
 }
 
 const statusConfig = {
@@ -38,20 +42,21 @@ const Tables = () => {
   const [addOpen, setAddOpen] = useState(false);
   const [newTable, setNewTable] = useState({ table_number: '', capacity: '4', section: 'Main' });
   const [filterSection, setFilterSection] = useState<string | null>(null);
+  const [transferTable, setTransferTable] = useState<{ tableId: string; tableNumber: string; orderId: string } | null>(null);
+  const [mergeTable, setMergeTable] = useState<{ tableId: string; tableNumber: string; orderId: string } | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [dragging, setDragging] = useState<string | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   const { data: tables = [], isLoading } = useQuery({
     queryKey: ['restaurant-tables'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('restaurant_tables')
-        .select('*')
-        .order('table_number');
+      const { data, error } = await supabase.from('restaurant_tables').select('*').order('table_number');
       if (error) throw error;
       return data as RestaurantTable[];
     },
   });
 
-  // Fetch active orders linked to tables
   const { data: tableOrders = {} } = useQuery({
     queryKey: ['table-orders'],
     queryFn: async () => {
@@ -74,15 +79,13 @@ const Tables = () => {
   });
 
   const handleTableTap = (table: RestaurantTable) => {
+    if (editMode) return;
     const activeOrder = tableOrders[table.id];
     if (table.status === 'vacant') {
-      // Navigate to orders with this table pre-selected
       navigate(`/orders?table=${table.id}&table_number=${table.table_number}`);
     } else if (table.status === 'occupied' && activeOrder) {
-      // Navigate to the existing order for this table
       navigate(`/orders?table=${table.id}&table_number=${table.table_number}&order=${activeOrder.id}`);
     } else if (table.status === 'dirty') {
-      // Mark as vacant
       updateStatus.mutate({ id: table.id, status: 'vacant' });
     }
   };
@@ -115,6 +118,49 @@ const Tables = () => {
     onError: (e: any) => toast({ title: 'Error', description: e.message, variant: 'destructive' }),
   });
 
+  const updatePosition = useMutation({
+    mutationFn: async ({ id, pos_x, pos_y }: { id: string; pos_x: number; pos_y: number }) => {
+      const { error } = await supabase.from('restaurant_tables').update({ pos_x, pos_y }).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['restaurant-tables'] }),
+  });
+
+  const handleDragStart = (e: React.PointerEvent, tableId: string) => {
+    if (!editMode) return;
+    setDragging(tableId);
+    const rect = (e.target as HTMLElement).closest('.table-card')?.getBoundingClientRect();
+    if (rect) {
+      setDragOffset({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    }
+  };
+
+  const handleDragMove = (e: React.PointerEvent) => {
+    if (!dragging || !editMode) return;
+    const container = document.getElementById('table-grid');
+    if (!container) return;
+    const containerRect = container.getBoundingClientRect();
+    const x = Math.max(0, Math.round((e.clientX - containerRect.left - dragOffset.x) / 10) * 10);
+    const y = Math.max(0, Math.round((e.clientY - containerRect.top - dragOffset.y) / 10) * 10);
+    // Optimistic update in state
+    const el = document.getElementById(`table-${dragging}`);
+    if (el) {
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+    }
+  };
+
+  const handleDragEnd = (e: React.PointerEvent) => {
+    if (!dragging || !editMode) return;
+    const container = document.getElementById('table-grid');
+    if (!container) return;
+    const containerRect = container.getBoundingClientRect();
+    const x = Math.max(0, Math.round((e.clientX - containerRect.left - dragOffset.x) / 10) * 10);
+    const y = Math.max(0, Math.round((e.clientY - containerRect.top - dragOffset.y) / 10) * 10);
+    updatePosition.mutate({ id: dragging, pos_x: x, pos_y: y });
+    setDragging(null);
+  };
+
   const sections = [...new Set(tables.map((t) => t.section).filter(Boolean))] as string[];
   const filteredTables = filterSection ? tables.filter((t) => t.section === filterSection) : tables;
 
@@ -129,6 +175,8 @@ const Tables = () => {
 
   if (isLoading) return <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
 
+  const hasPositions = tables.some((t) => (t.pos_x ?? 0) > 0 || (t.pos_y ?? 0) > 0);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -140,6 +188,9 @@ const Tables = () => {
           <Badge variant="outline" className="border-success text-success">Vacant: {summary.vacant}</Badge>
           <Badge variant="outline" className="border-occupied text-occupied">Occupied: {summary.occupied}</Badge>
           <Badge variant="outline" className="border-dirty text-dirty">Dirty: {summary.dirty}</Badge>
+          <Button size="sm" variant={editMode ? 'default' : 'outline'} onClick={() => setEditMode(!editMode)} className="touch-target gap-1">
+            {editMode ? '✓ Done' : '⇔ Layout'}
+          </Button>
           <Button size="sm" className="touch-target gap-1" onClick={() => setAddOpen(true)}>
             <Plus className="h-4 w-4" /> Add Table
           </Button>
@@ -155,71 +206,94 @@ const Tables = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-        {filteredTables.map((table) => {
-          const config = statusConfig[table.status];
-          const activeOrder = tableOrders[table.id];
-          return (
-            <Card
-              key={table.id}
-              className={cn('cursor-pointer border-2 transition-all active:scale-[0.97]', config.className)}
-              onClick={() => handleTableTap(table)}
-              onContextMenu={(e) => { e.preventDefault(); setQrTable(table); }}
-            >
-              <CardContent className="flex flex-col items-center justify-center p-4 sm:p-6">
-                <span className="text-2xl font-bold font-mono">{table.table_number}</span>
-                <span className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                  <Users className="h-3 w-3" />{table.capacity}
-                </span>
-                {table.section && <span className="text-[10px] text-muted-foreground">{table.section}</span>}
-                <Badge variant="secondary" className="mt-2 text-[10px]">{config.label}</Badge>
+      {editMode && hasPositions ? (
+        <div
+          id="table-grid"
+          className="relative border-2 border-dashed border-border rounded-xl bg-muted/20 overflow-hidden"
+          style={{ minHeight: 500 }}
+          onPointerMove={handleDragMove}
+          onPointerUp={handleDragEnd}
+        >
+          {filteredTables.map((table) => {
+            const config = statusConfig[table.status];
+            return (
+              <div
+                key={table.id}
+                id={`table-${table.id}`}
+                className={cn('absolute table-card cursor-grab active:cursor-grabbing rounded-xl border-2 p-3 w-24 text-center', config.className)}
+                style={{ left: table.pos_x ?? 0, top: table.pos_y ?? 0 }}
+                onPointerDown={(e) => handleDragStart(e, table.id)}
+              >
+                <span className="text-lg font-bold font-mono">{table.table_number}</span>
+                <Badge variant="secondary" className="mt-1 text-[9px] block">{config.label}</Badge>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+          {filteredTables.map((table) => {
+            const config = statusConfig[table.status];
+            const activeOrder = tableOrders[table.id];
+            return (
+              <Card
+                key={table.id}
+                className={cn('cursor-pointer border-2 transition-all active:scale-[0.97]', config.className)}
+                onClick={() => handleTableTap(table)}
+                onContextMenu={(e) => { e.preventDefault(); setQrTable(table); }}
+              >
+                <CardContent className="flex flex-col items-center justify-center p-4 sm:p-6">
+                  <span className="text-2xl font-bold font-mono">{table.table_number}</span>
+                  <span className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                    <Users className="h-3 w-3" />{table.capacity}
+                  </span>
+                  {table.section && <span className="text-[10px] text-muted-foreground">{table.section}</span>}
+                  <Badge variant="secondary" className="mt-2 text-[10px]">{config.label}</Badge>
 
-                {/* Show active order info */}
-                {activeOrder && (
-                  <div className="mt-2 text-center">
-                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                      <ShoppingCart className="h-3 w-3" />
-                      <span>#{activeOrder.order_number}</span>
+                  {activeOrder && (
+                    <div className="mt-2 text-center">
+                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                        <ShoppingCart className="h-3 w-3" />
+                        <span>#{activeOrder.order_number}</span>
+                      </div>
+                      <span className="text-xs font-mono font-bold text-primary">₹{activeOrder.total_amount.toFixed(0)}</span>
                     </div>
-                    <span className="text-xs font-mono font-bold text-primary">₹{activeOrder.total_amount.toFixed(0)}</span>
-                  </div>
-                )}
+                  )}
 
-                <Button
-                  variant="ghost" size="icon" className="mt-1 h-6 w-6"
-                  onClick={(e) => { e.stopPropagation(); setQrTable(table); }}
-                >
-                  <QrCode className="h-3.5 w-3.5" />
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                  <div className="flex gap-1 mt-2">
+                    <Button variant="ghost" size="icon" className="h-6 w-6"
+                      onClick={(e) => { e.stopPropagation(); setQrTable(table); }}>
+                      <QrCode className="h-3.5 w-3.5" />
+                    </Button>
+                    {table.status === 'occupied' && activeOrder && (
+                      <>
+                        <Button variant="ghost" size="icon" className="h-6 w-6"
+                          onClick={(e) => { e.stopPropagation(); setTransferTable({ tableId: table.id, tableNumber: table.table_number, orderId: activeOrder.id }); }}>
+                          <ArrowRightLeft className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-6 w-6"
+                          onClick={(e) => { e.stopPropagation(); setMergeTable({ tableId: table.id, tableNumber: table.table_number, orderId: activeOrder.id }); }}>
+                          <Combine className="h-3.5 w-3.5" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       {/* QR Code Dialog */}
       <Dialog open={!!qrTable} onOpenChange={() => setQrTable(null)}>
         <DialogContent className="max-w-xs text-center">
-          <DialogHeader>
-            <DialogTitle>QR Code — Table {qrTable?.table_number}</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>QR Code — Table {qrTable?.table_number}</DialogTitle></DialogHeader>
           <div className="flex flex-col items-center gap-4 py-4">
             <div className="rounded-xl border border-border bg-card p-4">
               <QRCodeSVG value={qrUrl} size={200} level="H" includeMargin />
             </div>
             <p className="text-xs text-muted-foreground break-all">{qrUrl}</p>
-            <Button variant="outline" size="sm" onClick={() => {
-              const svg = document.querySelector('.qr-dialog svg');
-              if (!svg) return;
-              const svgData = new XMLSerializer().serializeToString(svg);
-              const blob = new Blob([svgData], { type: 'image/svg+xml' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url; a.download = `table_${qrTable?.table_number}_qr.svg`; a.click();
-              URL.revokeObjectURL(url);
-            }}>
-              Download QR
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -250,6 +324,28 @@ const Tables = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Transfer Dialog */}
+      {transferTable && (
+        <TableTransferDialog
+          open={!!transferTable}
+          onOpenChange={() => setTransferTable(null)}
+          orderId={transferTable.orderId}
+          currentTableId={transferTable.tableId}
+          currentTableNumber={transferTable.tableNumber}
+        />
+      )}
+
+      {/* Merge Dialog */}
+      {mergeTable && (
+        <MergeTablesDialog
+          open={!!mergeTable}
+          onOpenChange={() => setMergeTable(null)}
+          primaryTableId={mergeTable.tableId}
+          primaryTableNumber={mergeTable.tableNumber}
+          orderId={mergeTable.orderId}
+        />
+      )}
     </div>
   );
 };

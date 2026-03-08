@@ -3,8 +3,9 @@ import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, ShoppingCart, Minus, Trash2, IndianRupee, Loader2, Split, Percent } from 'lucide-react';
+import { Search, Plus, ShoppingCart, Minus, Trash2, IndianRupee, Loader2, Split, Percent, MapPin, Phone, User } from 'lucide-react';
 import { useMenuItems, useMenuCategories } from '@/hooks/useMenuItems';
 import { useCreateOrder } from '@/hooks/useOrders';
 import BillingDialog from '@/components/BillingDialog';
@@ -36,8 +37,10 @@ const Orders = () => {
   const [discountApprovalOpen, setDiscountApprovalOpen] = useState(false);
   const [approvedDiscount, setApprovedDiscount] = useState(0);
   const [approvedDiscountReason, setApprovedDiscountReason] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [customerAddress, setCustomerAddress] = useState('');
   const { toast } = useToast();
-
 
   const { data: categories = [], isLoading: catsLoading } = useMenuCategories();
   const { data: menuItems = [], isLoading: itemsLoading } = useMenuItems();
@@ -68,11 +71,19 @@ const Orders = () => {
   const total = subtotal + gstAmount;
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  const showCustomerFields = orderType === 'delivery' || orderType === 'takeaway';
+
   const handleKOT = () => {
-    createOrder.mutate({ cart, orderType, tableId: tableId || undefined }, {
+    createOrder.mutate({
+      cart, orderType, tableId: tableId || undefined,
+      customerName: customerName || undefined,
+      customerPhone: customerPhone || undefined,
+      customerAddress: customerAddress || undefined,
+    }, {
       onSuccess: () => {
         setCart([]);
         setCartOpen(false);
+        setCustomerName(''); setCustomerPhone(''); setCustomerAddress('');
         if (tableId) setSearchParams({});
         toast({ title: 'KOT Sent', description: 'Order sent to kitchen.' });
       },
@@ -84,6 +95,9 @@ const Orders = () => {
     createOrder.mutate({
       cart, orderType, tableId: tableId || undefined, paymentMethod,
       discountAmount: totalDiscount,
+      customerName: customerName || undefined,
+      customerPhone: customerPhone || undefined,
+      customerAddress: customerAddress || undefined,
     }, {
       onSuccess: () => {
         setCart([]);
@@ -91,6 +105,7 @@ const Orders = () => {
         setCartOpen(false);
         setApprovedDiscount(0);
         setApprovedDiscountReason('');
+        setCustomerName(''); setCustomerPhone(''); setCustomerAddress('');
         if (tableId) setSearchParams({});
       },
     });
@@ -115,6 +130,27 @@ const Orders = () => {
       </div>
 
       <div className="flex-1 overflow-auto p-4">
+        {/* Customer details for delivery/takeaway */}
+        {showCustomerFields && (
+          <div className="space-y-2 mb-4 p-3 rounded-lg bg-muted/50 border border-border">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Customer Details</p>
+            <div className="flex items-center gap-2">
+              <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <Input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Name" className="h-8 text-xs" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <Input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="Phone" className="h-8 text-xs" type="tel" />
+            </div>
+            {orderType === 'delivery' && (
+              <div className="flex items-center gap-2">
+                <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <Input value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)} placeholder="Delivery address" className="h-8 text-xs" />
+              </div>
+            )}
+          </div>
+        )}
+
         {cart.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">Tap items to add</div>
         ) : (
@@ -166,7 +202,6 @@ const Orders = () => {
   return (
     <>
       <div className="flex h-[calc(100vh-7rem)] gap-4">
-        {/* Menu Grid */}
         <div className="flex flex-1 flex-col overflow-hidden">
           <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center">
             <div className="relative flex-1">
@@ -210,13 +245,11 @@ const Orders = () => {
           </div>
         </div>
 
-        {/* Desktop Cart */}
         <Card className="hidden lg:flex w-80 shrink-0 flex-col xl:w-96">
           {cartPanel}
         </Card>
       </div>
 
-      {/* Mobile Cart FAB */}
       <div className="fixed bottom-4 right-4 lg:hidden z-40">
         <Button size="lg" className="h-14 w-14 rounded-full shadow-lg touch-target relative" onClick={() => setCartOpen(true)}>
           <ShoppingCart className="h-6 w-6" />
@@ -226,7 +259,6 @@ const Orders = () => {
         </Button>
       </div>
 
-      {/* Mobile Cart Sheet */}
       {cartOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setCartOpen(false)} />
@@ -237,25 +269,13 @@ const Orders = () => {
       )}
 
       <BillingDialog open={billingOpen} onOpenChange={setBillingOpen} cart={cart} orderType={orderType} onConfirm={handleBillPay} loading={createOrder.isPending} />
-      <SplitBillDialog
-        open={splitOpen}
-        onOpenChange={setSplitOpen}
-        cart={cart}
-        total={total}
+      <SplitBillDialog open={splitOpen} onOpenChange={setSplitOpen} cart={cart} total={total}
         onConfirmSplit={(splits) => {
           setSplitOpen(false);
-          toast({
-            title: 'Bill Split',
-            description: splits.map((s) => `${s.label}: ₹${s.amount.toFixed(2)}`).join(' • '),
-          });
+          toast({ title: 'Bill Split', description: splits.map((s) => `${s.label}: ₹${s.amount.toFixed(2)}`).join(' • ') });
         }}
       />
-      <DiscountApprovalDialog
-        open={discountApprovalOpen}
-        onOpenChange={setDiscountApprovalOpen}
-        subtotal={subtotal}
-        onApproved={handleDiscountApproved}
-      />
+      <DiscountApprovalDialog open={discountApprovalOpen} onOpenChange={setDiscountApprovalOpen} subtotal={subtotal} onApproved={handleDiscountApproved} />
     </>
   );
 };
