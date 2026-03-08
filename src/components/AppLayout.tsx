@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLowStockAlert } from '@/hooks/useLowStockAlert';
@@ -7,6 +8,7 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 import {
   LayoutDashboard, ShoppingCart, Grid3X3, ChefHat, Package, Settings,
   LogOut, Menu, X, UtensilsCrossed, CalendarDays, FileSpreadsheet, Database,
