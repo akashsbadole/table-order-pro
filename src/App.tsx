@@ -23,6 +23,7 @@ import ExportImport from "./pages/ExportImport";
 import BackupPage from "./pages/Backup";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
+import Receipt from "./pages/Receipt";
 
 const queryClient = new QueryClient();
 
