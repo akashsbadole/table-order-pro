@@ -106,9 +106,10 @@ const Orders = () => {
   const cartPanel = (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between p-4 border-b border-border">
-        <h3 className="flex items-center gap-2 text-lg font-semibold">
+        <h3 className="flex items-center gap-2 text-lg font-semibold flex-wrap">
           <ShoppingCart className="h-5 w-5" /> Cart
           <Badge variant="secondary" className="capitalize">{orderType.replace('_', ' ')}</Badge>
+          {tableNumber && <Badge variant="outline" className="text-xs">Table {tableNumber}</Badge>}
         </h3>
         <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setCartOpen(false)}>✕</Button>
       </div>
