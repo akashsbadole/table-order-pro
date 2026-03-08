@@ -63,6 +63,11 @@ export function useCreateOrder() {
 
       if (orderError) throw orderError;
 
+      // Mark table as occupied if linked
+      if (params.tableId) {
+        await supabase.from('restaurant_tables').update({ status: 'occupied' }).eq('id', params.tableId);
+      }
+
       const orderItems = params.cart.map((item) => ({
         order_id: order.id,
         menu_item_id: item.id,
