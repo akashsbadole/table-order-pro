@@ -23,6 +23,7 @@ const navItemsDef = [
   { labelKey: 'nav.tables', path: '/tables', icon: <Grid3X3 className="h-5 w-5" />, roles: ['admin', 'manager', 'waiter'] },
   { labelKey: 'nav.kitchen', path: '/kitchen', icon: <ChefHat className="h-5 w-5" />, roles: ['admin', 'manager', 'kitchen_staff'] },
   { labelKey: 'nav.inventory', path: '/inventory', icon: <Package className="h-5 w-5" />, roles: ['admin', 'manager'] },
+  { labelKey: 'nav.purchaseOrders', path: '/purchase-orders', icon: <FileSpreadsheet className="h-5 w-5" />, roles: ['admin', 'manager'] },
   { labelKey: 'nav.menu', path: '/menu-management', icon: <UtensilsCrossed className="h-5 w-5" />, roles: ['admin', 'manager'] },
   { labelKey: 'nav.customers', path: '/customers', icon: <UserCircle className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier'] },
   { labelKey: 'nav.staff', path: '/staff-scheduling', icon: <CalendarDays className="h-5 w-5" />, roles: ['admin', 'manager'] },
