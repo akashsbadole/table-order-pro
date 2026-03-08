@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +9,28 @@ import { useMenuItems, useMenuCategories } from '@/hooks/useMenuItems';
 import { useCreateOrder } from '@/hooks/useOrders';
 import BillingDialog from '@/components/BillingDialog';
 import { useToast } from '@/hooks/use-toast';
+
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  gstRate: number;
+  quantity: number;
+  notes: string;
+}
+
+const Orders = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tableId = searchParams.get('table');
+  const tableNumber = searchParams.get('table_number');
+
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [orderType, setOrderType] = useState<'dine_in' | 'takeaway' | 'delivery'>(tableId ? 'dine_in' : 'dine_in');
+  const [billingOpen, setBillingOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const { toast } = useToast();
 
 interface CartItem {
   id: string;
