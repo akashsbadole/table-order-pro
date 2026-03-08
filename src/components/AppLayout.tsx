@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import OfflineBanner from '@/components/OfflineBanner';
 import {
   LayoutDashboard, ShoppingCart, Grid3X3, ChefHat, Package, Settings,
   LogOut, Menu, X, UtensilsCrossed, CalendarDays, FileSpreadsheet, Database,
