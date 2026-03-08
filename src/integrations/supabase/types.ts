@@ -348,7 +348,10 @@ export type Database = {
           logo_url: string | null
           name: string
           phone: string | null
+          tax_type: string
           updated_at: string
+          upi_id: string | null
+          vat_rate: number
         }
         Insert: {
           address?: string | null
@@ -359,7 +362,10 @@ export type Database = {
           logo_url?: string | null
           name: string
           phone?: string | null
+          tax_type?: string
           updated_at?: string
+          upi_id?: string | null
+          vat_rate?: number
         }
         Update: {
           address?: string | null
@@ -370,7 +376,10 @@ export type Database = {
           logo_url?: string | null
           name?: string
           phone?: string | null
+          tax_type?: string
           updated_at?: string
+          upi_id?: string | null
+          vat_rate?: number
         }
         Relationships: []
       }
@@ -494,6 +503,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "restaurant_tables_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_schedules: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          notes: string | null
+          organization_id: string
+          role: string
+          shift_date: string
+          start_time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          role?: string
+          shift_date: string
+          start_time: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          role?: string
+          shift_date?: string
+          start_time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_schedules_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
