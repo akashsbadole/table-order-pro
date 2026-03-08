@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import OfflineBanner from '@/components/OfflineBanner';
 import {
   LayoutDashboard, ShoppingCart, Grid3X3, ChefHat, Package, Settings,
   LogOut, Menu, X, UtensilsCrossed, CalendarDays, FileSpreadsheet, Database,
@@ -107,6 +108,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {sidebarOpen && <div className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       <div className="flex flex-1 flex-col overflow-hidden">
+        <OfflineBanner />
         <header className="flex h-14 items-center gap-4 border-b border-border bg-card px-4">
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
             <Menu className="h-5 w-5" />
@@ -129,6 +131,9 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </span>
         </header>
         <main className="flex-1 overflow-auto p-3 sm:p-4 lg:p-6">{children}</main>
+        <footer className="border-t border-border px-4 py-1.5 text-center text-[10px] text-muted-foreground/50 font-mono">
+          FoodPOS v1.0.0
+        </footer>
       </div>
     </div>
   );
