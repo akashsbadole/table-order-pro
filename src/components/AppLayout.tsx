@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard, ShoppingCart, Grid3X3, ChefHat, Package, Settings,
-  LogOut, Menu, X, UtensilsCrossed, CalendarDays, FileSpreadsheet,
+  LogOut, Menu, X, UtensilsCrossed, CalendarDays, FileSpreadsheet, Database,
 } from 'lucide-react';
 
 interface NavItem {
@@ -24,6 +24,7 @@ const navItems: NavItem[] = [
   { label: 'Menu', path: '/menu-management', icon: <UtensilsCrossed className="h-5 w-5" />, roles: ['admin', 'manager'] },
   { label: 'Staff', path: '/staff-scheduling', icon: <CalendarDays className="h-5 w-5" />, roles: ['admin', 'manager'] },
   { label: 'Export/Import', path: '/export-import', icon: <FileSpreadsheet className="h-5 w-5" />, roles: ['admin', 'manager'] },
+  { label: 'Backup', path: '/backup', icon: <Database className="h-5 w-5" />, roles: ['admin'] },
   { label: 'Settings', path: '/settings', icon: <Settings className="h-5 w-5" />, roles: ['admin'] },
 ];
 
@@ -41,37 +42,49 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       )}>
         <div className="flex h-full flex-col">
-          <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-6">
-            <UtensilsCrossed className="h-7 w-7 text-sidebar-primary" />
+          <div className="flex h-14 items-center gap-3 border-b border-sidebar-border px-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary">
+              <UtensilsCrossed className="h-4 w-4 text-sidebar-primary-foreground" />
+            </div>
             <span className="text-lg font-bold tracking-tight">FoodPOS</span>
             <Button variant="ghost" size="icon" className="ml-auto lg:hidden text-sidebar-foreground hover:bg-sidebar-accent" onClick={() => setSidebarOpen(false)}>
               <X className="h-5 w-5" />
             </Button>
           </div>
-          <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
+
+          {/* Org indicator */}
+          {profile?.organization_id && (
+            <div className="px-4 py-2 border-b border-sidebar-border">
+              <p className="text-xs text-sidebar-foreground/50 truncate">Organization</p>
+              <p className="text-sm font-medium text-sidebar-foreground truncate">Demo Restaurant</p>
+            </div>
+          )}
+
+          <nav className="flex-1 space-y-0.5 px-3 py-3 overflow-y-auto">
             {filteredNavItems.map((item) => (
               <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors touch-target',
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                   location.pathname === item.path
                     ? 'bg-sidebar-primary text-sidebar-primary-foreground'
                     : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                 )}>
-                {item.icon}{item.label}
+                {item.icon}<span className="truncate">{item.label}</span>
               </Link>
             ))}
           </nav>
-          <div className="border-t border-sidebar-border p-4">
-            <div className="mb-3 flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground text-sm font-semibold">
+
+          <div className="border-t border-sidebar-border p-3">
+            <div className="mb-2 flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground text-xs font-bold">
                 {profile?.full_name?.charAt(0)?.toUpperCase() ?? '?'}
               </div>
               <div className="flex-1 truncate">
                 <p className="text-sm font-medium truncate">{profile?.full_name ?? 'User'}</p>
-                <p className="text-xs text-sidebar-foreground/50 capitalize">{roles[0] ?? 'No role'}</p>
+                <p className="text-xs text-sidebar-foreground/50 capitalize">{roles[0]?.replace('_', ' ') ?? 'No role'}</p>
               </div>
             </div>
-            <Button variant="ghost" className="w-full justify-start gap-2 text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={signOut}>
+            <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-sidebar-foreground/70 hover:bg-sidebar-accent" onClick={signOut}>
               <LogOut className="h-4 w-4" /> Sign Out
             </Button>
           </div>
@@ -81,16 +94,16 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {sidebarOpen && <div className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-16 items-center gap-4 border-b border-border bg-card px-4 lg:px-6">
+        <header className="flex h-14 items-center gap-4 border-b border-border bg-card px-4">
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
           <div className="flex-1" />
-          <span className="text-xs text-muted-foreground font-mono">
+          <span className="text-xs text-muted-foreground font-mono hidden sm:block">
             {new Date().toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
           </span>
         </header>
-        <main className="flex-1 overflow-auto p-4 lg:p-6">{children}</main>
+        <main className="flex-1 overflow-auto p-3 sm:p-4 lg:p-6">{children}</main>
       </div>
     </div>
   );

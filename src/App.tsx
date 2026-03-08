@@ -16,6 +16,7 @@ import MenuManagement from "./pages/MenuManagement";
 import SettingsPage from "./pages/Settings";
 import StaffScheduling from "./pages/StaffScheduling";
 import ExportImport from "./pages/ExportImport";
+import BackupPage from "./pages/Backup";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
 
@@ -33,51 +34,16 @@ const App = () => (
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/" element={<Navigate to="/orders" replace />} />
 
-            <Route path="/dashboard" element={
-              <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                <AppLayout><Dashboard /></AppLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/orders" element={
-              <ProtectedRoute allowedRoles={['admin', 'manager', 'cashier', 'waiter']}>
-                <AppLayout><Orders /></AppLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/tables" element={
-              <ProtectedRoute allowedRoles={['admin', 'manager', 'waiter']}>
-                <AppLayout><Tables /></AppLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/kitchen" element={
-              <ProtectedRoute allowedRoles={['admin', 'manager', 'kitchen_staff']}>
-                <AppLayout><Kitchen /></AppLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/inventory" element={
-              <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                <AppLayout><Inventory /></AppLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/menu-management" element={
-              <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                <AppLayout><MenuManagement /></AppLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/staff-scheduling" element={
-              <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                <AppLayout><StaffScheduling /></AppLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/export-import" element={
-              <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                <AppLayout><ExportImport /></AppLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/settings" element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <AppLayout><SettingsPage /></AppLayout>
-              </ProtectedRoute>
-            } />
+            <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
+            <Route path="/orders" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'cashier', 'waiter']}><AppLayout><Orders /></AppLayout></ProtectedRoute>} />
+            <Route path="/tables" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'waiter']}><AppLayout><Tables /></AppLayout></ProtectedRoute>} />
+            <Route path="/kitchen" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'kitchen_staff']}><AppLayout><Kitchen /></AppLayout></ProtectedRoute>} />
+            <Route path="/inventory" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><Inventory /></AppLayout></ProtectedRoute>} />
+            <Route path="/menu-management" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><MenuManagement /></AppLayout></ProtectedRoute>} />
+            <Route path="/staff-scheduling" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><StaffScheduling /></AppLayout></ProtectedRoute>} />
+            <Route path="/export-import" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><ExportImport /></AppLayout></ProtectedRoute>} />
+            <Route path="/backup" element={<ProtectedRoute allowedRoles={['admin']}><AppLayout><BackupPage /></AppLayout></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute allowedRoles={['admin']}><AppLayout><SettingsPage /></AppLayout></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
