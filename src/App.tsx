@@ -15,6 +15,8 @@ import Tables from "./pages/Tables";
 import Kitchen from "./pages/Kitchen";
 import Inventory from "./pages/Inventory";
 import MenuManagement from "./pages/MenuManagement";
+import Customers from "./pages/Customers";
+import AuditLogs from "./pages/AuditLogs";
 import SettingsPage from "./pages/Settings";
 import StaffScheduling from "./pages/StaffScheduling";
 import ExportImport from "./pages/ExportImport";
