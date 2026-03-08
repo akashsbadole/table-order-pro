@@ -50,28 +50,7 @@ const SubscriptionAdmin = () => {
   };
 
   useEffect(() => {
-    const fetchAll = async () => {
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .select('*, organizations(name), subscription_plans(name)');
-
-      if (data) {
-        setSubs(
-          data.map((s: any) => ({
-            id: s.id,
-            organization_id: s.organization_id,
-            org_name: s.organizations?.name ?? 'Unknown',
-            status: s.status,
-            billing_cycle: s.billing_cycle,
-            trial_ends_at: s.trial_ends_at,
-            current_period_end: s.current_period_end,
-            plan_name: s.subscription_plans?.name ?? null,
-          }))
-        );
-      }
-      setLoading(false);
-    };
-    fetchAll();
+    fetchSubs();
   }, []);
 
   const now = new Date();
