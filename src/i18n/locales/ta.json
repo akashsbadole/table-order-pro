@@ -15,6 +15,7 @@
     "settings": "அமைப்புகள்",
     "gstReports": "GST அறிக்கைகள்",
     "eodSettlement": "நாள் முடிவு",
+    "reports": "அறிக்கைகள்",
     "signOut": "வெளியேறு"
   },
   "common": {
@@ -235,5 +236,38 @@
     "approved": "தள்ளுபடி அங்கீகரிக்கப்பட்டது",
     "approvedDiscount": "தள்ளுபடியை அங்கீகரித்தார்",
     "error": "சரிபார்ப்பு தோல்வி"
+  },
+  "loyalty": {
+    "title": "விசுவாசத் திட்டம்",
+    "availablePoints": "கிடைக்கும் புள்ளிகள்",
+    "totalVisits": "மொத்த வருகைகள்",
+    "pointsToEarn": "பெறும் புள்ளிகள்",
+    "redeemPoints": "புள்ளிகள் பயன்படுத்து",
+    "newCustomer": "புதிய வாடிக்கையாளர் — முதல் வருகை!"
+  },
+  "reports": {
+    "title": "அறிக்கைகள்",
+    "subtitle": "விற்பனை, சரக்கு மற்றும் பணியாளர் அறிக்கைகளை பதிவிறக்கு",
+    "sales": "விற்பனை",
+    "inventory": "சரக்கு",
+    "staff": "பணியாளர்",
+    "exportCSV": "CSV பதிவிறக்கு",
+    "printPDF": "அச்சிடு / PDF",
+    "totalOrders": "மொத்த ஆர்டர்கள்",
+    "revenue": "வருவாய்",
+    "taxCollected": "வரி வசூல்",
+    "discounts": "தள்ளுபடி",
+    "totalItems": "மொத்த பொருட்கள்",
+    "lowStockItems": "குறைந்த கையிருப்பு",
+    "inventoryValue": "சரக்கு மதிப்பு",
+    "totalShifts": "மொத்த ஷிப்டுகள்",
+    "uniqueStaff": "தனித்துவ பணியாளர்"
+  },
+  "pinLogin": {
+    "title": "விரைவு PIN உள்நுழைவு",
+    "enterPin": "உங்கள் 4-இலக்க பணியாளர் PIN உள்ளிடவும்",
+    "invalidPin": "இந்த PIN உடன் செயலில் உள்ள பணியாளர் இல்லை.",
+    "welcome": "மீண்டும் வரவேற்கிறோம்!",
+    "failed": "PIN உள்நுழைவு தோல்வி"
   }
 }

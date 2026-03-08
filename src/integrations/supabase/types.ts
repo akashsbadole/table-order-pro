@@ -99,6 +99,101 @@ export type Database = {
           },
         ]
       }
+      loyalty_points: {
+        Row: {
+          created_at: string
+          customer_name: string | null
+          customer_phone: string
+          id: string
+          organization_id: string
+          redeemed_points: number
+          total_points: number
+          total_spent: number
+          total_visits: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_name?: string | null
+          customer_phone: string
+          id?: string
+          organization_id: string
+          redeemed_points?: number
+          total_points?: number
+          total_spent?: number
+          total_visits?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string | null
+          customer_phone?: string
+          id?: string
+          organization_id?: string
+          redeemed_points?: number
+          total_points?: number
+          total_spent?: number
+          total_visits?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_points_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loyalty_transactions: {
+        Row: {
+          created_at: string
+          customer_phone: string
+          description: string | null
+          id: string
+          order_id: string | null
+          organization_id: string
+          points_earned: number
+          points_redeemed: number
+        }
+        Insert: {
+          created_at?: string
+          customer_phone: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          organization_id: string
+          points_earned?: number
+          points_redeemed?: number
+        }
+        Update: {
+          created_at?: string
+          customer_phone?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          organization_id?: string
+          points_earned?: number
+          points_redeemed?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loyalty_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       menu_categories: {
         Row: {
           created_at: string

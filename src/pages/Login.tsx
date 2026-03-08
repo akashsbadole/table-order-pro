@@ -7,8 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { UtensilsCrossed, Shield, Users, CreditCard, ConciergeBell, ChefHat } from 'lucide-react';
+import { UtensilsCrossed, Shield, Users, CreditCard, ConciergeBell, ChefHat, KeyRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import PinLoginDialog from '@/components/PinLoginDialog';
 
 const DEMO_CREDENTIALS = [
   { email: 'admin@foodpos.in', password: 'admin123', role: 'Admin', icon: Shield, color: 'bg-destructive text-destructive-foreground', access: 'Full access' },
@@ -26,6 +27,7 @@ const Login = () => {
 
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [signupData, setSignupData] = useState({ email: '', password: '', fullName: '' });
+  const [pinDialogOpen, setPinDialogOpen] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +76,9 @@ const Login = () => {
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">FoodPOS</h1>
           <p className="mt-1 text-sm text-muted-foreground">Restaurant Point of Sale</p>
+          <Button variant="outline" size="sm" className="mt-3 gap-2" onClick={() => setPinDialogOpen(true)}>
+            <KeyRound className="h-4 w-4" /> Quick PIN Login
+          </Button>
         </div>
 
         <Card className="mb-6">
@@ -193,6 +198,12 @@ const Login = () => {
           </CardContent>
         </Card>
       </div>
+
+      <PinLoginDialog
+        open={pinDialogOpen}
+        onOpenChange={setPinDialogOpen}
+        onSuccess={() => navigate('/orders')}
+      />
     </div>
   );
 };
