@@ -34,8 +34,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   const fetchProfileAndRoles = async (userId: string) => {
+    setProfileLoading(true);
     const [profileRes, rolesRes] = await Promise.all([
       supabase.from('profiles').select('*').eq('user_id', userId).single(),
       supabase.from('user_roles').select('role').eq('user_id', userId),
@@ -47,16 +49,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (rolesRes.data) {
       setRoles(rolesRes.data.map((r) => r.role as AppRole));
     }
+    setProfileLoading(false);
   };
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          setTimeout(() => fetchProfileAndRoles(session.user.id), 0);
+          fetchProfileAndRoles(session.user.id);
         } else {
           setProfile(null);
           setRoles([]);
@@ -105,7 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider
-      value={{ session, user, profile, roles, loading, signIn, signUp, signOut, hasRole, hasAnyRole }}
+      value={{ session, user, profile, roles, loading: loading || profileLoading, signIn, signUp, signOut, hasRole, hasAnyRole }}
     >
       {children}
     </AuthContext.Provider>
