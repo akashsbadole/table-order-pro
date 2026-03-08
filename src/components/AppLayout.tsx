@@ -116,10 +116,11 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <Link to="/inventory">
               <Badge variant="destructive" className="gap-1 cursor-pointer">
                 <AlertTriangle className="h-3 w-3" />
-                {lowStockCount} Low Stock
+                {lowStockCount} {t('inventory.lowStock')}
               </Badge>
             </Link>
           )}
+          <LanguageSwitcher />
           <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9">
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
