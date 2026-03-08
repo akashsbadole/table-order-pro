@@ -33,6 +33,9 @@ const Orders = () => {
   const [billingOpen, setBillingOpen] = useState(false);
   const [splitOpen, setSplitOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [discountApprovalOpen, setDiscountApprovalOpen] = useState(false);
+  const [approvedDiscount, setApprovedDiscount] = useState(0);
+  const [approvedDiscountReason, setApprovedDiscountReason] = useState('');
   const { toast } = useToast();
 
 
