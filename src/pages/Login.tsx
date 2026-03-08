@@ -7,8 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { UtensilsCrossed, Shield, Users, CreditCard, ConciergeBell, ChefHat } from 'lucide-react';
+import { UtensilsCrossed, Shield, Users, CreditCard, ConciergeBell, ChefHat, KeyRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import PinLoginDialog from '@/components/PinLoginDialog';
 
 const DEMO_CREDENTIALS = [
   { email: 'admin@foodpos.in', password: 'admin123', role: 'Admin', icon: Shield, color: 'bg-destructive text-destructive-foreground', access: 'Full access' },
