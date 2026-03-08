@@ -1,7 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSubscription } from '@/hooks/useSubscription';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,9 +9,8 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
   const { session, loading, roles } = useAuth();
-  const { loading: subLoading, isActive } = useSubscription();
 
-  if (loading || subLoading) {
+  if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
@@ -22,10 +20,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
 
   if (!session) {
     return <Navigate to="/login" replace />;
-  }
-
-  if (!isActive()) {
-    return <Navigate to="/pricing" replace />;
   }
 
   if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.some((r) => roles.includes(r))) {
