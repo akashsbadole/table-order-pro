@@ -98,7 +98,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               </div>
             </div>
             <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-sidebar-foreground/70 hover:bg-sidebar-accent" onClick={signOut}>
-              <LogOut className="h-4 w-4" /> Sign Out
+              <LogOut className="h-4 w-4" /> {t('nav.signOut')}
             </Button>
           </div>
         </div>
