@@ -27,6 +27,7 @@ import Receipt from "./pages/Receipt";
 import GSTReports from "./pages/GSTReports";
 import EODSettlement from "./pages/EODSettlement";
 import Reports from "./pages/Reports";
+import Pricing from "./pages/Pricing";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
+              <Route path="/pricing" element={<Pricing />} />
               <Route path="/" element={<Navigate to="/orders" replace />} />
 
               <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
