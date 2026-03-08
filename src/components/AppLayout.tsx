@@ -108,6 +108,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {sidebarOpen && <div className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       <div className="flex flex-1 flex-col overflow-hidden">
+        <OfflineBanner />
         <header className="flex h-14 items-center gap-4 border-b border-border bg-card px-4">
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
             <Menu className="h-5 w-5" />
