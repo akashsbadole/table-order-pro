@@ -22,21 +22,21 @@ interface NavItem {
   roles: Array<'admin' | 'manager' | 'cashier' | 'waiter' | 'kitchen_staff'>;
 }
 
-const navItems: NavItem[] = [
-  { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="h-5 w-5" />, roles: ['admin', 'manager'] },
-  { label: 'Orders', path: '/orders', icon: <ShoppingCart className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier', 'waiter'] },
-  { label: 'History', path: '/order-history', icon: <History className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier'] },
-  { label: 'Tables', path: '/tables', icon: <Grid3X3 className="h-5 w-5" />, roles: ['admin', 'manager', 'waiter'] },
-  { label: 'Kitchen', path: '/kitchen', icon: <ChefHat className="h-5 w-5" />, roles: ['admin', 'manager', 'kitchen_staff'] },
-  { label: 'Inventory', path: '/inventory', icon: <Package className="h-5 w-5" />, roles: ['admin', 'manager'] },
-  { label: 'Menu', path: '/menu-management', icon: <UtensilsCrossed className="h-5 w-5" />, roles: ['admin', 'manager'] },
-  { label: 'Customers', path: '/customers', icon: <UserCircle className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier'] },
-  { label: 'Staff', path: '/staff-scheduling', icon: <CalendarDays className="h-5 w-5" />, roles: ['admin', 'manager'] },
-  { label: 'Audit Logs', path: '/audit-logs', icon: <Shield className="h-5 w-5" />, roles: ['admin'] },
-  { label: 'Export/Import', path: '/export-import', icon: <FileSpreadsheet className="h-5 w-5" />, roles: ['admin', 'manager'] },
-  { label: 'Backup', path: '/backup', icon: <Database className="h-5 w-5" />, roles: ['admin'] },
-  { label: 'Settings', path: '/settings', icon: <Settings className="h-5 w-5" />, roles: ['admin'] },
-];
+const navItemsDef = [
+  { labelKey: 'nav.dashboard', path: '/dashboard', icon: <LayoutDashboard className="h-5 w-5" />, roles: ['admin', 'manager'] },
+  { labelKey: 'nav.orders', path: '/orders', icon: <ShoppingCart className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier', 'waiter'] },
+  { labelKey: 'nav.history', path: '/order-history', icon: <History className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier'] },
+  { labelKey: 'nav.tables', path: '/tables', icon: <Grid3X3 className="h-5 w-5" />, roles: ['admin', 'manager', 'waiter'] },
+  { labelKey: 'nav.kitchen', path: '/kitchen', icon: <ChefHat className="h-5 w-5" />, roles: ['admin', 'manager', 'kitchen_staff'] },
+  { labelKey: 'nav.inventory', path: '/inventory', icon: <Package className="h-5 w-5" />, roles: ['admin', 'manager'] },
+  { labelKey: 'nav.menu', path: '/menu-management', icon: <UtensilsCrossed className="h-5 w-5" />, roles: ['admin', 'manager'] },
+  { labelKey: 'nav.customers', path: '/customers', icon: <UserCircle className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier'] },
+  { labelKey: 'nav.staff', path: '/staff-scheduling', icon: <CalendarDays className="h-5 w-5" />, roles: ['admin', 'manager'] },
+  { labelKey: 'nav.auditLogs', path: '/audit-logs', icon: <Shield className="h-5 w-5" />, roles: ['admin'] },
+  { labelKey: 'nav.exportImport', path: '/export-import', icon: <FileSpreadsheet className="h-5 w-5" />, roles: ['admin', 'manager'] },
+  { labelKey: 'nav.backup', path: '/backup', icon: <Database className="h-5 w-5" />, roles: ['admin'] },
+  { labelKey: 'nav.settings', path: '/settings', icon: <Settings className="h-5 w-5" />, roles: ['admin'] },
+] as const;
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { profile, roles, signOut } = useAuth();
