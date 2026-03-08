@@ -1,9 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { IndianRupee, Printer, CreditCard, Banknote, Smartphone } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { IndianRupee, Printer, CreditCard, Banknote, Smartphone, Percent, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface CartItem {
   id: string;
@@ -19,27 +23,56 @@ interface BillingDialogProps {
   onOpenChange: (open: boolean) => void;
   cart: CartItem[];
   orderType: 'dine_in' | 'takeaway' | 'delivery';
-  onConfirm: (paymentMethod: 'cash' | 'card' | 'upi') => void;
+  onConfirm: (paymentMethod: 'cash' | 'card' | 'upi', discount: number) => void;
   loading?: boolean;
   orderNumber?: number;
+  taxType?: 'gst' | 'vat';
+  vatRate?: number;
+  upiId?: string;
 }
 
 const BillingDialog: React.FC<BillingDialogProps> = ({
   open, onOpenChange, cart, orderType, onConfirm, loading, orderNumber,
+  taxType = 'gst', vatRate = 0, upiId,
 }) => {
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'upi'>('cash');
+  const [discountType, setDiscountType] = useState<'percent' | 'flat'>('percent');
+  const [discountValue, setDiscountValue] = useState('');
   const receiptRef = useRef<HTMLDivElement>(null);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const gstAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity * item.gstRate) / 100, 0);
-  const cgst = gstAmount / 2;
-  const sgst = gstAmount / 2;
-  const total = subtotal + gstAmount;
+  const discountAmount = discountType === 'percent'
+    ? (subtotal * (parseFloat(discountValue) || 0)) / 100
+    : parseFloat(discountValue) || 0;
+  const afterDiscount = Math.max(0, subtotal - discountAmount);
+
+  // Tax calculation based on type
+  let taxLabel1 = '', taxLabel2 = '', tax1 = 0, tax2 = 0, totalTax = 0;
+  if (taxType === 'gst') {
+    totalTax = cart.reduce((sum, item) => sum + (item.price * item.quantity * item.gstRate) / 100, 0);
+    // Adjust tax proportionally if discount applied
+    const taxRatio = subtotal > 0 ? afterDiscount / subtotal : 0;
+    totalTax = totalTax * taxRatio;
+    tax1 = totalTax / 2;
+    tax2 = totalTax / 2;
+    taxLabel1 = 'CGST (2.5%)';
+    taxLabel2 = 'SGST (2.5%)';
+  } else {
+    totalTax = (afterDiscount * vatRate) / 100;
+    tax1 = totalTax;
+    tax2 = 0;
+    taxLabel1 = `VAT (${vatRate}%)`;
+    taxLabel2 = '';
+  }
+
+  const total = afterDiscount + totalTax;
+
+  const upiPaymentString = upiId ? `upi://pay?pa=${upiId}&pn=Restaurant&am=${total.toFixed(2)}&cu=INR` : '';
 
   const handlePrint = () => {
     const printContent = receiptRef.current;
     if (!printContent) return;
-    const win = window.open('', '', 'width=300,height=600');
+    const win = window.open('', '', 'width=300,height=700');
     if (!win) return;
     win.document.write(`
       <html><head><title>Receipt</title>
@@ -63,7 +96,7 @@ const BillingDialog: React.FC<BillingDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <IndianRupee className="h-5 w-5" />
@@ -71,7 +104,29 @@ const BillingDialog: React.FC<BillingDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        {/* Receipt Preview */}
+        {/* Discount Section */}
+        <div className="space-y-2">
+          <p className="text-sm font-medium flex items-center gap-1"><Percent className="h-4 w-4" /> Discount</p>
+          <div className="flex gap-2">
+            <Select value={discountType} onValueChange={(v: 'percent' | 'flat') => setDiscountType(v)}>
+              <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="percent">Percent %</SelectItem>
+                <SelectItem value="flat">Flat ₹</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input
+              type="number"
+              placeholder={discountType === 'percent' ? '0-100' : '₹ amount'}
+              value={discountValue}
+              onChange={(e) => setDiscountValue(e.target.value)}
+              className="flex-1"
+              min="0"
+            />
+          </div>
+        </div>
+
+        {/* Receipt */}
         <div ref={receiptRef} className="rounded-lg border border-border bg-card p-4 space-y-3 text-sm">
           <div className="text-center">
             <h2 className="font-bold text-lg">Demo Restaurant</h2>
@@ -79,19 +134,12 @@ const BillingDialog: React.FC<BillingDialogProps> = ({
             <p className="text-xs text-muted-foreground">GSTIN: 29ABCDE1234F1Z5</p>
             <p className="text-xs text-muted-foreground">Tel: +91 9876543210</p>
           </div>
-
           <Separator />
-
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>{new Date().toLocaleString('en-IN')}</span>
-            <Badge variant="outline" className="text-[10px] capitalize">
-              {orderType.replace('_', ' ')}
-            </Badge>
+            <Badge variant="outline" className="text-[10px] capitalize">{orderType.replace('_', ' ')}</Badge>
           </div>
-          {orderNumber && (
-            <p className="text-xs font-mono text-muted-foreground">Order #{orderNumber}</p>
-          )}
-
+          {orderNumber && <p className="text-xs font-mono text-muted-foreground">Order #{orderNumber}</p>}
           <Separator />
 
           <div className="space-y-1">
@@ -108,7 +156,6 @@ const BillingDialog: React.FC<BillingDialogProps> = ({
               </div>
             ))}
           </div>
-
           <Separator />
 
           <div className="space-y-1">
@@ -116,14 +163,22 @@ const BillingDialog: React.FC<BillingDialogProps> = ({
               <span className="text-muted-foreground">Subtotal</span>
               <span className="font-mono">₹{subtotal.toFixed(2)}</span>
             </div>
+            {discountAmount > 0 && (
+              <div className="flex justify-between text-sm text-destructive">
+                <span>Discount {discountType === 'percent' ? `(${discountValue}%)` : ''}</span>
+                <span className="font-mono">-₹{discountAmount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">CGST (2.5%)</span>
-              <span className="font-mono">₹{cgst.toFixed(2)}</span>
+              <span className="text-muted-foreground">{taxLabel1}</span>
+              <span className="font-mono">₹{tax1.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">SGST (2.5%)</span>
-              <span className="font-mono">₹{sgst.toFixed(2)}</span>
-            </div>
+            {taxLabel2 && (
+              <div className="flex justify-between text-xs">
+                <span className="text-muted-foreground">{taxLabel2}</span>
+                <span className="font-mono">₹{tax2.toFixed(2)}</span>
+              </div>
+            )}
             <Separator />
             <div className="flex justify-between text-lg font-bold">
               <span>Total</span>
@@ -158,14 +213,29 @@ const BillingDialog: React.FC<BillingDialogProps> = ({
           </div>
         </div>
 
+        {/* UPI QR Code */}
+        {paymentMethod === 'upi' && (
+          <div className="flex flex-col items-center gap-2 rounded-lg border border-border bg-muted/30 p-4">
+            <p className="text-sm font-medium flex items-center gap-1"><QrCode className="h-4 w-4" /> Scan to Pay</p>
+            <div className="bg-card rounded-lg p-3">
+              <QRCodeSVG
+                value={upiPaymentString || `upi://pay?pn=Restaurant&am=${total.toFixed(2)}&cu=INR`}
+                size={160}
+                level="H"
+                includeMargin
+              />
+            </div>
+            <p className="text-xs text-muted-foreground font-mono">₹{total.toFixed(2)}</p>
+          </div>
+        )}
+
         <DialogFooter className="flex gap-2 sm:gap-2">
           <Button variant="outline" className="flex-1 touch-target gap-2" onClick={handlePrint}>
-            <Printer className="h-4 w-4" />
-            Print Receipt
+            <Printer className="h-4 w-4" /> Print
           </Button>
           <Button
             className="flex-1 touch-target"
-            onClick={() => onConfirm(paymentMethod)}
+            onClick={() => onConfirm(paymentMethod, discountAmount)}
             disabled={loading}
           >
             {loading ? 'Processing...' : `Pay ₹${total.toFixed(2)}`}
