@@ -20,6 +20,7 @@ interface CreateOrderParams {
   customerPhone?: string;
   customerAddress?: string;
   paymentMethod?: 'cash' | 'card' | 'upi';
+  discountAmount?: number;
 }
 
 export function useCreateOrder() {
@@ -32,12 +33,14 @@ export function useCreateOrder() {
       if (!profile?.organization_id) throw new Error('No organization found');
 
       const subtotal = params.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      const gstAmount = params.cart.reduce((sum, item) => sum + (item.price * item.quantity * item.gstRate) / 100, 0);
+      const discount = params.discountAmount || 0;
+      const afterDiscount = Math.max(0, subtotal - discount);
+      const taxRatio = subtotal > 0 ? afterDiscount / subtotal : 0;
+      const gstAmount = params.cart.reduce((sum, item) => sum + (item.price * item.quantity * item.gstRate) / 100, 0) * taxRatio;
       const cgst = gstAmount / 2;
       const sgst = gstAmount / 2;
-      const total = subtotal + gstAmount;
+      const total = afterDiscount + gstAmount;
 
-      // Create order
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -50,6 +53,7 @@ export function useCreateOrder() {
           subtotal,
           cgst_amount: cgst,
           sgst_amount: sgst,
+          discount_amount: discount,
           total_amount: total,
           status: 'confirmed',
           created_by: profile.user_id,
@@ -59,7 +63,6 @@ export function useCreateOrder() {
 
       if (orderError) throw orderError;
 
-      // Create order items
       const orderItems = params.cart.map((item) => ({
         order_id: order.id,
         menu_item_id: item.id,
@@ -74,7 +77,6 @@ export function useCreateOrder() {
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
       if (itemsError) throw itemsError;
 
-      // Create transaction if payment method provided
       if (params.paymentMethod) {
         const { error: txError } = await supabase.from('transactions').insert({
           order_id: order.id,
@@ -85,8 +87,6 @@ export function useCreateOrder() {
           processed_by: profile.user_id,
         });
         if (txError) throw txError;
-
-        // Mark order as completed
         await supabase.from('orders').update({ status: 'completed' }).eq('id', order.id);
       }
 
