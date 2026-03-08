@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard, ShoppingCart, Grid3X3, ChefHat, Package, Settings,
   LogOut, Menu, X, UtensilsCrossed, CalendarDays, FileSpreadsheet, Database,
+  History, Moon, Sun,
 } from 'lucide-react';
 
 interface NavItem {
@@ -18,6 +20,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="h-5 w-5" />, roles: ['admin', 'manager'] },
   { label: 'Orders', path: '/orders', icon: <ShoppingCart className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier', 'waiter'] },
+  { label: 'History', path: '/order-history', icon: <History className="h-5 w-5" />, roles: ['admin', 'manager', 'cashier'] },
   { label: 'Tables', path: '/tables', icon: <Grid3X3 className="h-5 w-5" />, roles: ['admin', 'manager', 'waiter'] },
   { label: 'Kitchen', path: '/kitchen', icon: <ChefHat className="h-5 w-5" />, roles: ['admin', 'manager', 'kitchen_staff'] },
   { label: 'Inventory', path: '/inventory', icon: <Package className="h-5 w-5" />, roles: ['admin', 'manager'] },
@@ -30,6 +33,7 @@ const navItems: NavItem[] = [
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { profile, roles, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -52,7 +56,6 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </Button>
           </div>
 
-          {/* Org indicator */}
           {profile?.organization_id && (
             <div className="px-4 py-2 border-b border-sidebar-border">
               <p className="text-xs text-sidebar-foreground/50 truncate">Organization</p>
@@ -99,6 +102,9 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <Menu className="h-5 w-5" />
           </Button>
           <div className="flex-1" />
+          <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9">
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
           <span className="text-xs text-muted-foreground font-mono hidden sm:block">
             {new Date().toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
           </span>
