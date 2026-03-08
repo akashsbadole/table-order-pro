@@ -117,112 +117,129 @@ const SubscriptionAdmin = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Subscription Management</h1>
-        <p className="text-muted-foreground">Monitor all organization subscriptions, trials, and expiries.</p>
+        <p className="text-muted-foreground">Monitor subscriptions and manage plans.</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Orgs</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{subs.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Subscriptions</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{activeCount}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">On Trial</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{trialingCount}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Expiring in 7 days</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{expiringIn7}</div>
-            {expiredCount > 0 && (
-              <p className="text-xs text-destructive mt-1">{expiredCount} already expired</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="overview" className="gap-2">
+            <Crown className="h-4 w-4" /> Overview
+          </TabsTrigger>
+          <TabsTrigger value="plans" className="gap-2">
+            <Settings2 className="h-4 w-4" /> Manage Plans
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Crown className="h-5 w-5 text-primary" /> All Subscriptions
-              </CardTitle>
-              <CardDescription>{filtered.length} organizations</CardDescription>
-            </div>
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search org or status..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-              />
-            </div>
+        <TabsContent value="overview" className="space-y-6">
+          {/* Stats */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Orgs</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-foreground">{subs.length}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Active Subscriptions</CardTitle>
+                <CheckCircle className="h-4 w-4 text-primary" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-foreground">{activeCount}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">On Trial</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-foreground">{trialingCount}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Expiring in 7 days</CardTitle>
+                <AlertTriangle className="h-4 w-4 text-destructive" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-foreground">{expiringIn7}</div>
+                {expiredCount > 0 && (
+                  <p className="text-xs text-destructive mt-1">{expiredCount} already expired</p>
+                )}
+              </CardContent>
+            </Card>
           </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Organization</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Plan</TableHead>
-                <TableHead>Billing</TableHead>
-                <TableHead>Trial Ends</TableHead>
-                <TableHead>Period Ends</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    No subscriptions found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filtered.map((sub) => (
-                  <TableRow key={sub.id}>
-                    <TableCell className="font-medium text-foreground">{sub.org_name}</TableCell>
-                    <TableCell>{getStatusBadge(sub)}</TableCell>
-                    <TableCell className="text-muted-foreground">{sub.plan_name ?? 'No plan'}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="capitalize">
-                        {sub.billing_cycle}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{formatDate(sub.trial_ends_at)}</TableCell>
-                    <TableCell className="text-muted-foreground">{formatDate(sub.current_period_end)}</TableCell>
+
+          {/* Table */}
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Crown className="h-5 w-5 text-primary" /> All Subscriptions
+                  </CardTitle>
+                  <CardDescription>{filtered.length} organizations</CardDescription>
+                </div>
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search org or status..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Organization</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Plan</TableHead>
+                    <TableHead>Billing</TableHead>
+                    <TableHead>Trial Ends</TableHead>
+                    <TableHead>Period Ends</TableHead>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {filtered.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                        No subscriptions found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filtered.map((sub) => (
+                      <TableRow key={sub.id}>
+                        <TableCell className="font-medium text-foreground">{sub.org_name}</TableCell>
+                        <TableCell>{getStatusBadge(sub)}</TableCell>
+                        <TableCell className="text-muted-foreground">{sub.plan_name ?? 'No plan'}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="capitalize">
+                            {sub.billing_cycle}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{formatDate(sub.trial_ends_at)}</TableCell>
+                        <TableCell className="text-muted-foreground">{formatDate(sub.current_period_end)}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="plans">
+          <SubscriptionPlanManager />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
