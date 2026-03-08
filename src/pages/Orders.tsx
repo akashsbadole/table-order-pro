@@ -131,6 +131,9 @@ const Orders = () => {
         </div>
         <div className="flex gap-2 pt-2">
           <Button variant="outline" className="flex-1 touch-target" disabled={cart.length === 0 || createOrder.isPending} onClick={handleKOT}>{createOrder.isPending ? 'Sending...' : 'KOT'}</Button>
+          <Button variant="secondary" className="touch-target gap-1" disabled={cart.length === 0} onClick={() => setSplitOpen(true)}>
+            <Split className="h-3 w-3" />
+          </Button>
           <Button className="flex-1 touch-target" disabled={cart.length === 0} onClick={() => setBillingOpen(true)}>Bill & Pay</Button>
         </div>
       </div>
